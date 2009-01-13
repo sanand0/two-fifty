@@ -1,0 +1,88 @@
+<!doctype html>
+<html><head>
+<title>Track IMDb Top 250 movies you have seen</title>
+<link rel="stylesheet" type="text/css" media="all" href="http://www.s-anand.net/960-full.css">
+<style>
+h1 { margin-bottom: 10px; border-bottom: 1px solid #aaa; }
+h1 a { text-decoration: none; }
+.seen, .seen * { text-decoration: line-through; color: #aaa; }
+</style>
+</head><body>
+<div class="container_16">
+    <div class="grid_16">
+        <h1>Track the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a></h1>
+    </div>
+    <div class="grid_10">
+        {% if user %}
+            <p><label for="filter">Filter:</label>
+            <select id="filter">
+                <option value="all"   >Show all         movies</option>
+                <option value="unseen">Show only unseen movies</option>
+                <option value="seen"  >Show only seen   movies</option>
+            </select>
+            {{ user.nickname }} has seen <span id="count">{{ count }}</span> / 250 movies.</p>
+        {% endif %}
+        <table id="movies"><thead>
+            <tr><th>Rank</th><th>Movie</th><th></th><th>Rating</th><th>Votes</th></tr>
+        </thead><tbody>
+            {% for movie in movies %}
+                <tr class="{% if movie.seen %}seen{% else %}unseen{% endif %}"><td>{{ movie.rank }}
+                </td><td>{% if can_change %}<a class="toggle" data={{ movie.url }} href="#">{{ movie.title }}</a> ({{ movie.year }})
+                         {% else %}{{ movie.title }} ({{ movie.year }})
+                         {% endif %}
+                </td><td><a target="_blank" href="http://www.imdb.com{{ movie.url }}">info</a>
+                </td><td>{{ movie.rating }}
+                </td><td>{{ movie.votes }}
+                </td></tr>
+            {% endfor %}
+        </tbody></table>
+    </div>
+    <div class="grid_6">
+        {% if logged_in %}
+            <p>You are logged in as {{ logged_in.nickname }}. <a href="/logout">Click here to logout</a></p>
+            {% if can_change %}
+                <p><i>Click on a movie to mark it as <span class="seen">seen</span>. Click again to toggle.</i></p>
+            {% endif %}
+        {% else %}
+            <p><a href="/login">Click here to log in and track movies you have watched.</a></p>
+            <p><i>This application lets you mark movies that you have seen on the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a>. You can see which movies you've missed out, and compare how many others have seen.</i></p>
+        {% endif %}
+
+        <h2>Top movie watchers</h2>
+        <ul>
+        {% for person in stats %}
+            <li> <a href="/user/{{ person.user.email }}">{{ person.user.nickname }}</a> ({{ person.num }} / 250)</li>
+        {% endfor %}
+        </ul>
+
+    </div>
+</div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
+<script>
+{% if user %}
+    $('#filter').change(function(e) {
+        switch($(this).find('option:selected').attr('value')) {
+            case 'all':         $('tr.seen,tr.unseen').show(); break;
+            case 'seen':     $('tr.seen').show(); $('tr.unseen').hide(); break;
+            case 'unseen':   $('tr.seen').hide(); $('tr.unseen').show(); break;
+        }
+    })
+{% endif %}
+{% if can_change %}
+    $('#movies a.toggle').click(function(e) {
+        e.preventDefault();
+        var tgt = $(e.target), url = tgt.attr('data');
+        $.post('/', {movie: url}, function(response) {
+            if (response == url) {
+                var tr = tgt.parents('tr').eq(0);
+                if      (tr.hasClass('seen'  )) { tr.addClass('unseen').removeClass('seen'  ); }
+                else if (tr.hasClass('unseen')) { tr.addClass('seen'  ).removeClass('unseen'); }
+                $('#count').text($('tr.seen').length);
+            }
+        })
+    })
+{% endif %}
+$("#movies tr:even").css("background-color", "#eef");
+$('#movies thead tr').css({"background-color": "#558", "color": "white"});
+</script>
+</body></html>

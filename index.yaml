@@ -10,13 +10,14 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 283 times in query history.
-- kind: Top250
-  properties:
-  - name: time
-    direction: desc
-
+# Used 8 times in query history.
 - kind: Count
   properties:
   - name: num
+    direction: desc
+
+# Used 299 times in query history.
+- kind: Top250
+  properties:
+  - name: time
     direction: desc

@@ -7,6 +7,17 @@ handlers:
 - url: /favicon.ico
   static_files: favicon.ico
   upload: favicon.ico
+  expiration: "4h"
+  mime_type: image/x-icon
+
+- url: /loading-small.gif
+  static_files: loading-small.gif
+  upload: loading-small.gif
+  expiration: "4h"
+
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
 
 - url: /.*
   script: 250.py

@@ -5,8 +5,12 @@
 <style>
 h1 { margin-bottom: 10px; border-bottom: 1px solid #aaa; }
 h1 a { text-decoration: none; }
+h2 { margin-bottom: 5px; }
 .seen, .seen * { text-decoration: line-through; color: #aaa; }
+p { margin-bottom: 2px; }
+th { _cursor: hand; cursor: pointer; }
 </style>
+<script src="http://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
 </head><body>
 <div class="container_16">
     <div class="grid_16">
@@ -22,15 +26,19 @@ h1 a { text-decoration: none; }
             </select>
             {{ user.nickname }} has seen <span id="count">{{ count }}</span> / 250 movies.</p>
         {% endif %}
-        <table id="movies"><thead>
-            <tr><th>Rank</th><th>Movie</th><th></th><th>Rating</th><th>Votes</th></tr>
+        {% if can_change %}
+            <p><i>Click on a movie to mark it as <span class="seen">seen</span>. Click again to toggle.</i></p>
+        {% endif %}
+        <table id="movies" class="sortable"><thead>
+            <tr><th>Rank</th><th>Year</th><th>Movie</th><th></th><th>Rating</th><th>Votes</th></tr>
         </thead><tbody>
             {% for movie in movies %}
                 <tr class="{% if movie.seen %}seen{% else %}unseen{% endif %}"><td>{{ movie.rank }}
-                </td><td>{% if can_change %}<a class="toggle" data={{ movie.url }} href="#">{{ movie.title }}</a> ({{ movie.year }})
-                         {% else %}{{ movie.title }} ({{ movie.year }})
+                </td><td>{{ movie.year }}
+                </td><td>{% if can_change %}<a class="toggle" title="Click to mark as seen or unseen" data={{ movie.url }} href="#">{{ movie.title }}</a>
+                         {% else %}{{ movie.title }}
                          {% endif %}
-                </td><td><a target="_blank" href="http://www.imdb.com{{ movie.url }}">info</a>
+                </td><td><a target="_blank" title="Open IMDb page in new window" href="http://www.imdb.com{{ movie.url }}">info</a>
                 </td><td>{{ movie.rating }}
                 </td><td>{{ movie.votes }}
                 </td></tr>
@@ -40,9 +48,6 @@ h1 a { text-decoration: none; }
     <div class="grid_6">
         {% if logged_in %}
             <p>You are logged in as {{ logged_in.nickname }}. <a href="/logout">Click here to logout</a></p>
-            {% if can_change %}
-                <p><i>Click on a movie to mark it as <span class="seen">seen</span>. Click again to toggle.</i></p>
-            {% endif %}
         {% else %}
             <p><a href="/login">Click here to log in and track movies you have watched.</a></p>
             <p><i>This application lets you mark movies that you have seen on the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a>. You can see which movies you've missed out, and compare how many others have seen.</i></p>
@@ -72,11 +77,13 @@ h1 a { text-decoration: none; }
     $('#movies a.toggle').click(function(e) {
         e.preventDefault();
         var tgt = $(e.target), url = tgt.attr('data');
+        tgt.parent().append('<img src="loading-small.gif" alt="working..." class="working">')
         $.post('/', {movie: url}, function(response) {
             if (response == url) {
                 var tr = tgt.parents('tr').eq(0);
                 if      (tr.hasClass('seen'  )) { tr.addClass('unseen').removeClass('seen'  ); }
                 else if (tr.hasClass('unseen')) { tr.addClass('seen'  ).removeClass('unseen'); }
+                tr.find('.working').remove();
                 $('#count').text($('tr.seen').length);
             }
         })

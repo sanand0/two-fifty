@@ -57,7 +57,7 @@ class MoviePage(webapp.RequestHandler):
             logged_in   = user,
             can_change  = user==person and user,
             count       = seen_count,
-            stats       = Count.all().order('-num').fetch(10)
+            stats       = Count.all().order('-num').fetch(20)
         )))
 
 def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)

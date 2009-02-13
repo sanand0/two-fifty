@@ -38,13 +38,13 @@ class MoviePage(webapp.RequestHandler):
             seen = Seen.all().filter('user = ', user).filter('url = ', url).get()
             if seen:
                 seen.delete()
-                set_user_info(user, change_count=-1)
+                set_info(user, change_count=-1)
             else:
                 Seen(user=user, time=now, url=url).put()
-                set_user_info(user, change_count=+1)
+                set_info(user, change_count=+1)
             self.response.out.write(url)
         elif user and disp:
-            set_user_info(user, disp = disp)                                    # Change display name for user
+            set_info(user, disp = disp)                                         # Change display name for user
             self.redirect('/')                                                  # Go back to user's page
         else: self.response.out.write('Not logged in, or no URL');
 
@@ -53,9 +53,9 @@ class MoviePage(webapp.RequestHandler):
         movies = read_250_from_db()                                             # Read from the datastore
         if person:                                                              # If it's movies for a person,
             count  = mark_seen_movies(movies, person)                           #   Count the number of movies the person has seen
-            person_info = set_user_info(person, set_count = count)              #   and save it in the datastore
+            person_info = set_info(person, set_count = count)                   #   and save it in the datastore
         else: count, person_info = 0, None
-        user_info       = Count.all().filter('user = ', user).get()                     # User's count, name, etc.
+        user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
         person_disp     = person_info and (person_info.disp or person.nickname()) or ''
         user_disp       = user_info and (user_info.disp or user.nickname()) or ''
         logged_in       = user and 1 or 0
@@ -70,8 +70,8 @@ def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
 def download_250():
     '''Downloads the top 250 movies on IMDb and saves it in the data store'''
     try:
-        movies = []
-        result = urlfetch.fetch('http://www.imdb.com/chart/top')                    # Get the IMDB Top 250
+        movies, result = [], urlfetch.fetch('http://www.imdb.com/chart/top')        # Get the IMDB Top 250
+        logging.info('Refreshing IMDb Top 250. Status = ' + str(result.status_code))
         if result.status_code == 200:
             re_scripts = re.compile(r'<script.*?</script', re.I + re.S)             # Remove <script></script> tags: they interfere with BeautifulSoup
             soup = BeautifulSoup(re.sub(re_scripts, '', result.content))
@@ -85,9 +85,7 @@ def download_250():
                     'rating': cell[1].font.string,                                  # Structure: <font>9.0</font>
                     'votes': cell[3].font.string,                                   # Structure: <font>100,000</font>
                 })
-            data = '\n'.join(encode(movie) for movie in movies)
-        Top250(time=now, data=data).put()
-        logging.info('Refreshing IMDb Top 250. Status = ' + str(result.status_code))
+            Top250(time=now, data='\n'.join(encode(movie) for movie in movies)).put()
     except:
         pass
 
@@ -102,19 +100,31 @@ def last_download_date():
 def mark_seen_movies(movies, user):
     count, seen = 0, {}
     for movie in Seen.all().filter('user = ', user):
-        seen[movie.url] = True
+        seen[movie.url] = movie.time
         count = count + 1
     for movie in movies: movie['seen'] = seen.get(movie['url'], False)
     return count
 
-def set_user_info(user, set_count = None, change_count = None, disp = None):
-    user_info = Count.all().filter('user = ', user).get() or Count(user=user, time=now, num=0)
-    if set_count    is not None:  user_info.num   = int(set_count)
-    if change_count is not None:  user_info.num  += int(change_count)
-    if disp         is not None:  user_info.disp  = disp
-    user_info.time = now
-    user_info.put()
-    return user_info
+def set_info(person, set_count = None, change_count = None, disp = None):
+    # Get the person info, creating it only if the person is the user
+    person_info = Count.all().filter('user = ', person).get()
+    if not person_info and user == person: person_info = Count(user=person, time=now, num=0)
+
+    if person_info:
+        # Get the new "seen count" into num, and update it if it's changed
+        num, changed = person_info.num, 0
+        if set_count    is not None:  num  = int(set_count)
+        if change_count is not None:  num += int(change_count)
+        if (set_count or change_count) and person_info.num  != num: person_info.num, changed = num, 1
+
+        # Only the user can change the display name
+        if user==person and disp and (person_info.disp != disp): person_info.disp, changed = disp, 1
+
+        # Update the time only if something's changed
+        if changed:
+            person_info.time = now
+            person_info.put()
+    return person_info
 
 class LoginPage(webapp.RequestHandler):
     def get(self): self.redirect(users.create_login_url('/'))
@@ -122,9 +132,36 @@ class LoginPage(webapp.RequestHandler):
 class LogoutPage(webapp.RequestHandler):
     def get(self): self.redirect(users.create_logout_url('/'))
 
+class ExportPage(webapp.RequestHandler):
+    def get(self):
+        self.response.headers["Content-Type"] = "text/plain"
+        for row in Seen.all(): self.response.out.write('\t'.join((str(row.user), row.url)) + '\n')
+
+class DataPage(webapp.RequestHandler):
+    def get(self, person, data):
+        self.response.headers["Content-Type"] = "application/javascript"
+        callback = self.request.get('callback')
+        if data == 'users':
+            if user and users.is_current_user_admin():
+                userlist = Count.all().fetch(1000)
+                self.response.out.write(template.render('users.txt', locals()))
+        else:
+            person      = users.User(urllib.unquote_plus(person))
+            person_info = Count.all().filter('user = ', person).get()
+            if person_info:
+                person_disp = person_info.disp or person.nickname()
+                if data == 'count':
+                    self.response.out.write(template.render('count.txt', locals()))
+                elif data == 'seen':
+                    movies = read_250_from_db()
+                    count  = mark_seen_movies(movies, person)
+                    self.response.out.write(template.render('seen.txt', locals()))
+
 application = webapp.WSGIApplication([
         ('/',                   MoviePage),
         ('/user/(.+)',          MoviePage),
+        ('/export/Seen',        ExportPage),
+        ('/data/(.+)/(.+)',     DataPage),
         ('/login',              LoginPage),
         ('/logout',             LogoutPage),
     ],

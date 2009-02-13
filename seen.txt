@@ -1,0 +1,3 @@
+{% if callback %}{{ callback }}({% endif %}{user:"{{ person.email }}",name:"{{ person_disp|addslashes }}",count:{{ person_info.num }},movies:[
+{% for movie in movies %}{rank:"{{movie.rank}}",title:"{{movie.title|addslashes}}",year:"{{movie.year}}",url:"{{movie.url}}",rating:"{{movie.rating}}",votes:"{{movie.votes}}"{% if movie.seen %},seen:"{{movie.seen}}"{% endif %}}{% if not forloop.last %},{% endif %}
+{% endfor %}]}{% if callback %}){% endif %}

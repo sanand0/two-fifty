@@ -8,7 +8,7 @@ h1 a { text-decoration: none; }
 h2 { margin-bottom: 5px; font-size: 16px; }
 .seen, .seen * { text-decoration: line-through; color: #aaa; }
 p { margin-bottom: 2px; }
-h2, thead, .login{ background-color: #39639D; color: #fff; padding-left: 3px; }
+h2, thead, .login { background-color: #39639D; color: #fff; padding-left: 3px; }
 th { _cursor: hand; cursor: pointer; }
 .login { display: block; border: 4px outset #ccf; -moz-border-radius: 50px; text-align: center; text-decoration: none; font-size: 14px; font-weight: bold; }
 .login:hover { border: 4px solid #ccf; }
@@ -17,9 +17,17 @@ th { _cursor: hand; cursor: pointer; }
 .box { background-color: #2DA2BF; float:right; text-align: right; color: #fff; font-size: 90%; }
 .valign_middle { vertical-align: middle; }
 #top_watchers td { white-space: nowrap; padding-right: 5px; }
+
 .icon { display:block; float:right; margin-left: 2px; }
 .source { font-size: 10px; line-height: 1; height:4em; width:100%; border: 1px solid #ccc; overflow:hidden; }
 .widget-name { color: #39639D; font-weight: bold; }
+
+.both { color: #000; font-style: normal; }
+.person { color: #08f; }
+.other { color: #f00; font-style: italic; }
+.neither { color: #999; }
+
+.diff { text-decoration: none; color: #da1f28; font: bold 12px Calibri,Arial,sans-serif; }
 </style>
 <!-- script src="http://asset.userfly.com/users/12427/userfly.js" type="text/javascript"></script -->
 <style type='text/css'>@import url('http://s3.amazonaws.com/getsatisfaction.com/feedback/feedback.css');</style>
@@ -31,21 +39,48 @@ th { _cursor: hand; cursor: pointer; }
   GSFN.feedback('http://getsatisfaction.com/twofifty/feedback/topics/new?display=overlay&style=idea', tab_options);
 </script>
 <script src="http://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.1/jquery.min.js"></script>
 </head><body>
 <div class="container_16">
     <div class="grid_16">
-        <h1>Track the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a></h1>
+        <h1>Track the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a>{% if other %}:
+            <span class="person">{% firstof person_info.disp person.nickname %}</span> vs <span class="other">{% firstof other_info.disp other.nickname %}</span>
+        {% endif %}
+        </h1>
     </div>
     <div class="grid_10">
         {% if person %}
             <p><label for="filter">Filter:</label>
             <select id="filter">
-                <option value="all"   >Show all         movies</option>
-                <option value="unseen">Show only unseen movies</option>
-                <option value="seen"  >Show only seen   movies</option>
+                <option value="all"             >All movies</option>
+                {% if other %}
+                <option value="person_not_other">Seen only by {% firstof person_info.disp person.nickname %} NOT {% firstof other_info.disp other.nickname %}</option>
+                <option value="other_not_person">Seen only by {% firstof other_info.disp other.nickname %} NOT {% firstof person_info.disp person.nickname %}</option>
+                <option value="both"            >Seen by Both</option>
+                <option value="either"          >Seen by Either</option>
+                <option value="neither"         >Seen by Neither</option>
+                <option value="person"          >Seen by {% firstof person_info.disp person.nickname %}</option>
+                <option value="other"           >Seen by {% firstof other_info.disp other.nickname %}</option>
+                {% else %}
+                <option value="unseen"          >Show only unseen movies</option>
+                <option value="seen"            >Show only seen   movies</option>
+                {% endif %}
             </select>
-            {{ person_disp }} has seen <span id="count">{{ count }}</span> / 250 movies.</p>
+            {% if other %}
+                <span class="person">{% firstof person_info.disp person.nickname %}: <span id="count">{{ person_info.num }}</span>.</span>
+                <span class="other" >{% firstof other_info.disp  other.nickname  %}: <span id="count">{{ other_info.num  }}</span>.</span>
+            {% else %}
+                {% firstof person_info.disp person.nickname %} has seen <span id="count">{{ person_info.num }}</span> / 250 movies.
+                {% if user %}{% ifnotequal user person %}<a href="/compare/{{ person.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
+            {% endif %}
+            </p>
         {% endif %}
+        {% if other %}<p>
+            <a href="#" class="legend both"   ><span class="num both"   ></span> seen by both</a>.
+            <a href="#" class="legend person" ><span class="num person" ></span> only by {% firstof person_info.disp person.nickname %}</a>.
+            <a href="#" class="legend other"  ><span class="num other"  ></span> only by {% firstof other_info.disp  other.nickname  %}</a>.
+            <a href="#" class="legend neither"><span class="num neither"></span> by neither</a>.
+        </p>{% endif %}
         {% if can_change %}
             <p><i>Click on a movie to mark it as <span class="seen">seen</span>. Click again to toggle.</i></p>
         {% endif %}
@@ -53,7 +88,7 @@ th { _cursor: hand; cursor: pointer; }
             <tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
         </thead><tbody>
             {% for movie in movies %}
-                <tr class="{% if movie.seen %}seen{% else %}unseen{% endif %}"><td>{{ movie.rank }}
+                <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
                 </td><td>{{ movie.year }}
                 </td><td><a class="icon" target="_blank" title="Search for torrent" href="http://www.mininova.org/search/{{ movie.title|urlencode }}/4/seeds"><img src="http://www.google.com/s2/favicons?domain_url=http://www.mininova.org/"></a>
                          <a class="icon" target="_blank" title="Open IMDb page in new window" href="http://www.imdb.com{{ movie.url }}"><img src="http://www.google.com/s2/favicons?domain_url=http://www.imdb.com/"></a>
@@ -65,11 +100,12 @@ th { _cursor: hand; cursor: pointer; }
                 </td></tr>
             {% endfor %}
         </tbody></table>
+        <p style="line-height:1.25;"><a type="application/rss+xml" rel="alternate" href="http://feeds.s-anand.net/imdbtop250"><img style="float:left;margin-right:5px;" alt="" src="http://www.feedburner.com/fb/images/pub/feed-icon32x32.png"/>Subscribe to the<br>IMDb Top 250 RSS feed</a></p>
     </div>
     <div class="grid_6">
-        {% if logged_in %}
-            <p>You are logged in as <span id="disp_name">{{ user_disp }}</span>. <a href='#' id="show_change_form">Change name</a> | <a href="/logout">Logout</a></p>
-            <form id="change_name" action="/" method="post"><input id="disp" name="disp" value="{{ user_disp }}"><input type="submit" value="Change"></form>
+        {% if user %}
+            <p>You are logged in as <span id="disp_name">{% firstof user_info.disp user_info.user.nickname %}</span>. <a href='#' id="show_change_form">Change name</a> | <a href="/logout">Logout</a></p>
+            <form id="change_name" action="/" method="post"><input id="disp" name="disp" value="{% firstof user_info.disp user_info.user.nickname %}"><input type="submit" value="Change"></form>
         {% else %}
             <a class="login" href="/login">Log in to track movies you have watched</a>
             <p><i>This application lets you mark movies that you have seen on the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a>. You can see which movies you've missed out, and compare how many others have seen.</i></p>
@@ -78,22 +114,26 @@ th { _cursor: hand; cursor: pointer; }
         <h2>Top movie watchers</h2>
         <table id="top_watchers">
         {% for person in top_watchers %}
-            <tr><td><div class="box valign_middle" style="width:{% widthratio person.num 250 200 %}px">{{ person.num }} &nbsp;</div></td><td class="valign_middle"><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a></td></tr>
+            <tr><td><div class="box valign_middle" style="width:{% widthratio person.num 250 200 %}px">{{ person.num }} &nbsp;</div></td><td class="valign_middle"><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a> {% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</td></tr>
         {% endfor %}
         </table>
 
         <h2>Recently activity</h2>
         <ul id="recent_users">
         {% for person in recent_users %}
-            <li><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a> ({{ person.num }} / 250)</li>
+            <li><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a> ({{ person.num }} / 250) {% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
         {% endfor %}
         </ul>
 
         {% if can_change %}
         <h2>Widgets</h2><div>
-            <div style="float:right;border:1px solid #ccc;margin:5px 0;"><script src="/count.js"></script><script src="/data/{{ person.email }}/count?callback=twofifty_count"></script></div>
+            <div style="float:right;margin:5px 0;border:1px solid #ccc;"><img src="/movie-count-widget.png"></div>
             Add the <span class="widget-name">Movie Counter</span> widget to your website. It shows visitors the number of movies you've watched. Copy and paste the code below to your website.
             <textarea class="source" readonly>&lt;script src="http://250.s-anand.net/count.js"&gt;&lt;/script&gt;&lt;script src="http://250.s-anand.net/data/{{ person.email }}/count?callback=twofifty_count"&gt;&lt;/script&gt;</textarea>
+            <br>
+            <div style="float:right;margin:5px 0 5px 5px;border:1px solid #ccc;"><img src="/movie-seen-widget.png"></div>
+            The <span class="widget-name">Recent Movies</span> widget shows the last 5 movies you watched on IMDb. Copy and paste the code below to your website.
+            <textarea class="source" readonly>&lt;script src="http://250.s-anand.net/seen.js"&gt;&lt;/script&gt;&lt;script src="http://250.s-anand.net/data/{{ person.email }}/seen?callback=twofifty_seen"&gt;&lt;/script&gt;</textarea>
         </div>
         {% endif %}
 
@@ -106,17 +146,27 @@ th { _cursor: hand; cursor: pointer; }
         </div>
     </div>
 </div>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
 <script>
-{% if person %}
-    $('#filter').change(function(e) {
-        switch($(this).find('option:selected').attr('value')) {
-            case 'all':         $('tr.seen,tr.unseen').show(); break;
-            case 'seen':     $('tr.seen').show(); $('tr.unseen').hide(); break;
-            case 'unseen':   $('tr.seen').hide(); $('tr.unseen').show(); break;
-        }
-    });
-{% endif %}
+$('#filter').change(function(e) {
+    switch($(this).find('option:selected').attr('value')) {
+        case 'all':                 $('#movies tr').show(); break;
+        case 'seen':                $('#movies tr.seen').show(); $('#movies tr.unseen').hide(); break;
+        case 'unseen':              $('#movies tr.unseen').show(); $('#movies tr.seen').hide(); break;
+        case 'person':              $('#movies tr.person,tr.both').show(); $('#movies tr.other,tr.neither').hide(); break;
+        case 'other':               $('#movies tr.other,tr.both').show(); $('#movies tr.person,tr.neither').hide(); break;
+        case 'both':                $('#movies tr.both').show(); $('#movies tr.person,tr.other,tr.neither').hide(); break;
+        case 'either':              $('#movies tr.person,tr.other,tr.both').show(); $('#movies tr.neither').hide(); break;
+        case 'neither':             $('#movies tr.neither').show(); $('#movies tr.person,tr.other,tr.both').hide(); break;
+        case 'person_not_other':    $('#movies tr.person').show(); $('#movies tr.both,tr.other,tr.neither').hide(); break;
+        case 'other_not_person':    $('#movies tr.other').show(); $('#movies tr.both,tr.person,tr.neither').hide(); break;
+    }
+});
+$('.num').each(function() { var e = $(this); e.html($('tr.' + e.attr('class').replace(/\s*num\s*/, '')).length + ' '); });
+$('.legend').click(function(e) {
+    $('#movies tbody tr').hide();
+    $('tr.' + $(this).attr('class').replace(/\s*legend\s*/, '')).show();
+    e.preventDefault();
+});
 {% if can_change %}
     $('#movies a.toggle').click(function(e) {
         e.preventDefault();
@@ -133,10 +183,10 @@ th { _cursor: hand; cursor: pointer; }
         })
     });
 {% endif %}
-{% if logged_in %}
+{% if user %}
     $('#show_change_form').click(function() { $('#change_name').toggle(); });
 {% endif %}
-$("#movies tbody tr:odd").css("background-color", "#eef");
+$("#movies tbody tr:odd").css("background-color", "#f0f0f0");
 $('.source').click(function() { $(this).select(); });
 </script>
 <script type="text/javascript">

@@ -38,13 +38,13 @@ class MoviePage(webapp.RequestHandler):
             seen = Seen.all().filter('user = ', user).filter('url = ', url).get()
             if seen:
                 seen.delete()
-                set_info(user, change_count=-1)
+                user_prop(user, change_count=-1)
             else:
                 Seen(user=user, time=now, url=url).put()
-                set_info(user, change_count=+1)
+                user_prop(user, change_count=+1)
             self.response.out.write(url)
         elif user and disp:
-            set_info(user, disp = disp)                                         # Change display name for user
+            user_prop(user, set_disp = disp)                                    # Change display name for user
             self.redirect('/')                                                  # Go back to user's page
         else: self.response.out.write('Not logged in, or no URL');
 
@@ -52,17 +52,32 @@ class MoviePage(webapp.RequestHandler):
         if last_download_date() < now - a_day: download_250()                   # Download IMDb Top 250 if it's over a day old
         movies = read_250_from_db()                                             # Read from the datastore
         if person:                                                              # If it's movies for a person,
-            count  = mark_seen_movies(movies, person)                           #   Count the number of movies the person has seen
-            person_info = set_info(person, set_count = count)                   #   and save it in the datastore
-        else: count, person_info = 0, None
+            person_count = mark_seen_movies(movies, person)                     #   Count the number of movies the person has seen
+            person_info  = user_prop(person, set_count = person_count)          #   and save it in the datastore
+        else: person_info = None
         user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
-        person_disp     = person_info and (person_info.disp or person.nickname()) or ''
-        user_disp       = user_info and (user_info.disp or user.nickname()) or ''
-        logged_in       = user and 1 or 0
         can_change      = user==person and user
         top_watchers    = Count.all().order('-num').fetch(20)
         recent_users    = Count.all().order('-time').fetch(10)
-        self.response.out.write(template.render('index.html', locals()))
+        self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
+
+class ComparePage(webapp.RequestHandler):
+    def get(self, person, other):
+        person = users.User(urllib.unquote_plus(person))                        # At least one name must be specified
+        if not other: person, other = user, person                              # The other is the current user by default
+        else: other = users.User(urllib.unquote_plus(other))
+
+        person_info  = Count.all().filter('user = ', person).get()
+        other_info   = Count.all().filter('user = ', other).get()
+        user_info    = Count.all().filter('user = ', user).get()
+        if person_info and other_info:
+            if last_download_date() < now - a_day: download_250()               # Download IMDb Top 250 if it's over a day old
+            movies = read_250_from_db()                                         # Read from the datastore
+            count_person = mark_seen_movies(movies, person, 'person')           # Mark the number of movies person has seen
+            count_other  = mark_seen_movies(movies, other , 'other' )           # Mark the number of movies other has seen
+            top_watchers = Count.all().order('-num').fetch(20)
+            recent_users = Count.all().order('-time').fetch(10)
+            self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
 
 def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
 def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
@@ -97,33 +112,36 @@ def last_download_date():
     top = Top250.all().order('-time').get()
     return top and top.time or datetime.datetime(1900, 1, 1)
 
-def mark_seen_movies(movies, user):
+def mark_seen_movies(movies, user, param='seen'):                                   # Loops through movies, setting param to last seen date (if seen)
     count, seen = 0, {}
-    for movie in Seen.all().filter('user = ', user):
-        seen[movie.url] = movie.time
-        count = count + 1
-    for movie in movies: movie['seen'] = seen.get(movie['url'], False)
-    return count
+    for movie in Seen.all().filter('user = ', user): seen[movie.url] = movie.time   # Get the user's seen movies as a dict
+    for movie in movies:
+        movie[param] = seen.get(movie['url'], False)                                # Mark the seen movies in the full 250 movie list
+        if movie[param]: count += 1                                                 # Count movies in the 250 that the user has seen
+    return count                                                                    # Return the seen count
 
-def set_info(person, set_count = None, change_count = None, disp = None):
+# TODO: This is a BAD function. Refactor.
+def user_prop(person, set_count = None, change_count = None, set_disp = None):
     # Get the person info, creating it only if the person is the user
     person_info = Count.all().filter('user = ', person).get()
-    if not person_info and user == person: person_info = Count(user=person, time=now, num=0)
+    if not person_info and user == person and (set_count or change_count or set_disp):
+        person_info = Count(user=person, time=now, num=0)
 
     if person_info:
-        # Get the new "seen count" into num, and update it if it's changed
+        # Get the new "seen count" into num, and update it if it's changed (anyone can update that)
         num, changed = person_info.num, 0
         if set_count    is not None:  num  = int(set_count)
         if change_count is not None:  num += int(change_count)
-        if (set_count or change_count) and person_info.num  != num: person_info.num, changed = num, 1
+        if (set_count or change_count) and person_info.num != num: person_info.num, changed = num, 1
 
         # Only the user can change the display name
-        if user==person and disp and (person_info.disp != disp): person_info.disp, changed = disp, 1
+        if user==person and set_disp and person_info.disp != set_disp: person_info.disp, changed = set_disp, 1
 
         # Update the time only if something's changed
         if changed:
-            person_info.time = now
+            if user == person: person_info.time = now
             person_info.put()
+
     return person_info
 
 class LoginPage(webapp.RequestHandler):
@@ -131,11 +149,6 @@ class LoginPage(webapp.RequestHandler):
 
 class LogoutPage(webapp.RequestHandler):
     def get(self): self.redirect(users.create_logout_url('/'))
-
-class ExportPage(webapp.RequestHandler):
-    def get(self):
-        self.response.headers["Content-Type"] = "text/plain"
-        for row in Seen.all(): self.response.out.write('\t'.join((str(row.user), row.url)) + '\n')
 
 class DataPage(webapp.RequestHandler):
     def get(self, person, data):
@@ -158,12 +171,12 @@ class DataPage(webapp.RequestHandler):
                     self.response.out.write(template.render('seen.txt', locals()))
 
 application = webapp.WSGIApplication([
-        ('/',                   MoviePage),
-        ('/user/(.+)',          MoviePage),
-        ('/export/Seen',        ExportPage),
-        ('/data/(.+)/(.+)',     DataPage),
-        ('/login',              LoginPage),
-        ('/logout',             LogoutPage),
+        ('/',                       MoviePage),
+        ('/user/(.+)',              MoviePage),
+        ('/data/(.+)/(.+)',         DataPage),
+        ('/compare/([^/]+)/?(.+)?', ComparePage),
+        ('/login',                  LoginPage),
+        ('/logout',                 LogoutPage),
     ],
     debug=True)
 wsgiref.handlers.CGIHandler().run(application)

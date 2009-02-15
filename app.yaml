@@ -19,6 +19,18 @@ handlers:
   static_files: count.js
   upload: count.js
 
+- url: /movie-count-widget.png
+  static_files: movie-count-widget.png
+  upload: movie-count-widget.png
+
+- url: /seen.js
+  static_files: seen.js
+  upload: seen.js
+
+- url: /movie-seen-widget.png
+  static_files: movie-seen-widget.png
+  upload: movie-seen-widget.png
+
 - url: /robots.txt
   static_files: robots.txt
   upload: robots.txt

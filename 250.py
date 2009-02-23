@@ -59,6 +59,7 @@ class MoviePage(webapp.RequestHandler):
         can_change      = user==person and user
         top_watchers    = Count.all().order('-num').fetch(20)
         recent_users    = Count.all().order('-time').fetch(10)
+        request         = self.request
         self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
 
 class ComparePage(webapp.RequestHandler):

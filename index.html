@@ -5,6 +5,7 @@
 <style>
 h1 { margin-bottom: 10px; border-bottom: 1px solid #aaa; }
 h1 a { text-decoration: none; }
+h1 a:hover { text-decoration: underline; }
 h2 { margin-bottom: 5px; font-size: 16px; }
 .seen, .seen * { text-decoration: line-through; color: #aaa; }
 p { margin-bottom: 2px; }
@@ -27,7 +28,9 @@ th { _cursor: hand; cursor: pointer; }
 .other { color: #f00; font-style: italic; }
 .neither { color: #999; }
 
+.timesince { font-style: italic; }
 .diff { text-decoration: none; color: #da1f28; font: bold 12px Calibri,Arial,sans-serif; }
+.home { float:right; }
 </style>
 <!-- script src="http://asset.userfly.com/users/12427/userfly.js" type="text/javascript"></script -->
 <style type='text/css'>@import url('http://s3.amazonaws.com/getsatisfaction.com/feedback/feedback.css');</style>
@@ -46,6 +49,7 @@ th { _cursor: hand; cursor: pointer; }
         <h1>Track the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a>{% if other %}:
             <span class="person">{% firstof person_info.disp person.nickname %}</span> vs <span class="other">{% firstof other_info.disp other.nickname %}</span>
         {% endif %}
+        {% ifnotequal request.path "/" %}<a href="/" class="home">Home</a>{% endifnotequal %}
         </h1>
     </div>
     <div class="grid_10">
@@ -121,7 +125,7 @@ th { _cursor: hand; cursor: pointer; }
         <h2>Recently activity</h2>
         <ul id="recent_users">
         {% for person in recent_users %}
-            <li><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a> ({{ person.num }} / 250) {% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
+            <li><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a> ({{ person.num }} / 250) <span class="timesince">{{ now|timesince:person.time }} ago </span>{% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
         {% endfor %}
         </ul>
 
@@ -171,7 +175,7 @@ $('.legend').click(function(e) {
     $('#movies a.toggle').click(function(e) {
         e.preventDefault();
         var tgt = $(e.target), url = tgt.attr('data');
-        tgt.parent().append('<img src="loading-small.gif" alt="working..." class="working">')
+        tgt.parent().append('<img src="/loading-small.gif" alt="working..." class="working">')
         $.post('/', {movie: url}, function(response) {
             if (response == url) {
                 var tr = tgt.parents('tr').eq(0);

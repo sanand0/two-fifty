@@ -129,6 +129,16 @@ th { _cursor: hand; cursor: pointer; }
         {% endfor %}
         </ul>
 
+        {% if person_recos %}
+        <h2>Recommendations for {% firstof person_info.disp person.nickname %}</h2>
+        <ol id="person_recos">
+        {% for movie in person_recos %}
+            <li><a target="_blank" href="http://www.imdb.com{{ movie.url }}">{{ movie.title }}</a></li>
+        {% endfor %}
+        </ul>
+        <p>People whom you share movie interests with also watched the above.</p>
+        {% endif %}
+
         {% if can_change %}
         <h2>Widgets</h2><div>
             <div style="float:right;margin:5px 0;border:1px solid #ccc;"><img src="/movie-count-widget.png"></div>

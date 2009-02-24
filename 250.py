@@ -1,4 +1,4 @@
-import wsgiref.handlers, urllib, re, datetime, logging
+import wsgiref.handlers, urllib, re, datetime, logging, recodata
 from BeautifulSoup                        import BeautifulSoup
 from google.appengine.ext                 import webapp, db
 from google.appengine.api                 import users, urlfetch
@@ -54,6 +54,7 @@ class MoviePage(webapp.RequestHandler):
         if person:                                                              # If it's movies for a person,
             person_count = mark_seen_movies(movies, person)                     #   Count the number of movies the person has seen
             person_info  = user_prop(person, set_count = person_count)          #   and save it in the datastore
+            person_recos = get_recos(movies)[0:10]
         else: person_info = None
         user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
         can_change      = user==person and user
@@ -120,6 +121,19 @@ def mark_seen_movies(movies, user, param='seen'):                               
         movie[param] = seen.get(movie['url'], False)                                # Mark the seen movies in the full 250 movie list
         if movie[param]: count += 1                                                 # Count movies in the 250 that the user has seen
     return count                                                                    # Return the seen count
+
+def get_recos(movies, param='seen'):
+    index = dict((v,i) for i,v in enumerate(recodata.movies))
+    count, seen_movies, all_movies = {}, {}, {}
+    for movie in movies:
+        url = movie['url']
+        all_movies[url] = movie
+        if movie[param] and url in index:
+            seen_movies[url] = 1
+            for j, total in enumerate(recodata.similar[index[url]]):
+                m = recodata.movies[j]
+                count[m] = count.get(m, 0) + total
+    return tuple(all_movies[url] for url in sorted(count.keys(), key=count.__getitem__, reverse=True) if not url in seen_movies and url in all_movies)
 
 # TODO: This is a BAD function. Refactor.
 def user_prop(person, set_count = None, change_count = None, set_disp = None):

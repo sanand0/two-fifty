@@ -96,7 +96,7 @@ th { _cursor: hand; cursor: pointer; }
             {% for movie in movies %}
                 <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
                 </td><td>{{ movie.year }}
-                </td><td><a class="icon" target="_blank" title="Search for torrent" href="http://www.mininova.org/search/{{ movie.title|urlencode }}/4/seeds"><img src="http://www.google.com/s2/favicons?domain_url=http://www.mininova.org/"></a>
+                </td><td><a class="icon" target="_blank" title="Search for torrent" href="http://www.mininova.org/search/{{ movie.title }}/4/seeds"><img src="http://www.google.com/s2/favicons?domain_url=http://www.mininova.org/"></a>
                          <a class="icon" target="_blank" title="Open IMDb page in new window" href="http://www.imdb.com{{ movie.url }}"><img src="http://www.google.com/s2/favicons?domain_url=http://www.imdb.com/"></a>
                          {% if can_change %}<a class="toggle" title="Click to mark as seen or unseen" data={{ movie.url }} href="#">{{ movie.title }}</a>
                          {% else %}{{ movie.title }}
@@ -129,15 +129,18 @@ th { _cursor: hand; cursor: pointer; }
 
         <h2>Top movie watchers</h2>
         <table id="top_watchers">
-        {% for person in top_watchers %}
-            <tr><td><div class="box valign_middle" style="width:{% widthratio person.num 250 200 %}px">{{ person.num }} &nbsp;</div></td><td class="valign_middle"><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a> {% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</td></tr>
+        {% for person in top_watchers %}<tr>
+            <td><div class="box valign_middle" style="width:{% widthratio person.num 250 200 %}px">{{ person.num }}&nbsp;</div></td>
+            <td class="valign_middle">{% if person.disp %}<a href="/name/{{ person.disp|urlencode }}">{{ person.disp }}</a>{% else %}<a href="/user/{{ person.user.email }}">{{ person.user.nickname }}</a>{% endif %}
+                {% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
+            </td></tr>
         {% endfor %}
         </table>
 
         <h2>Recently activity</h2>
         <ul id="recent_users">
         {% for person in recent_users %}
-            <li><a href="/user/{{ person.user.email }}">{% firstof person.disp person.user.nickname %}</a> ({{ person.num }} / 250) <span class="timesince">{{ now|timesince:person.time }} ago </span>{% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
+            <li>{% if person.disp %}<a href="/name/{{ person.disp|urlencode }}">{{ person.disp }}</a>{% else %}<a href="/user/{{ person.user.email }}">{{ person.user.nickname }}</a>{% endif %} ({{ person.num }} / 250) <span class="timesince">{{ now|timesince:person.time }} ago </span>{% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
         {% endfor %}
         </ul>
 

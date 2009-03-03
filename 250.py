@@ -5,24 +5,24 @@ from google.appengine.api                 import users, urlfetch
 from google.appengine.ext.webapp          import template
 from google.appengine.api.urlfetch_errors import *
 
-user   = users.get_current_user()
-now    = datetime.datetime.now()
-a_day  = datetime.timedelta(1)
+user            = users.get_current_user()
+now             = datetime.datetime.now()
+yesterday       = now - datetime.timedelta(1)
 
 class Top250(db.Model):
-    time = db.DateTimeProperty   (required=True, auto_now_add=True)
-    data = db.TextProperty       (required=True)
+    time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,
+    data = db.TextProperty       (required=True)                        # this was the contents of the IMDb Top 250
 
 class Seen(db.Model):
-    user = db.UserProperty       (required=True)
-    time = db.DateTimeProperty   (required=True, auto_now_add=True)
-    url  = db.StringProperty     (required=True)
+    user = db.UserProperty       (required=True)                        # This user,
+    time = db.DateTimeProperty   (required=True, auto_now_add=True)     # at this time,
+    url  = db.StringProperty     (required=True)                        # saw this movie
 
 class Count(db.Model):
-    user = db.UserProperty       (required=True)
-    time = db.DateTimeProperty   (required=True, auto_now_add=True)
-    num  = db.IntegerProperty    (required=True)
-    disp = db.StringProperty     ()
+    user = db.UserProperty       (required=True)                        # Primary key: user
+    time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
+    num  = db.IntegerProperty    (required=True)                        # Number of movies seen, when last counted
+    disp = db.StringProperty     ()                                     # Display name
 
 class MoviePage(webapp.RequestHandler):
     # Conventions: person = whose information is shown on the page
@@ -44,12 +44,14 @@ class MoviePage(webapp.RequestHandler):
                 user_prop(user, change_count=+1)
             self.response.out.write(url)
         elif user and disp:
-            user_prop(user, set_disp = disp)                                    # Change display name for user
-            self.redirect('/')                                                  # Go back to user's page
+            if all(ord(c) < 128 for c in disp):                                 # Ensure that disp is pure ascii. Django templates croak otherwise
+                user_prop(user, set_disp = disp)                                # Change display name for user
+                self.redirect('/')                                              # Go back to user's page
+            else: self.response.out.write('Use only letters and numbers')       # Notify error
         else: self.response.out.write('Not logged in, or no URL');
 
     def show_page(self, person = None):
-        if last_download_date() < now - a_day: download_250()                   # Download IMDb Top 250 if it's over a day old
+        if last_download_date() < yesterday: download_250()                     # If we downloaded over a day ago,
         movies = read_250_from_db()                                             # Read from the datastore
         if person:                                                              # If it's movies for a person,
             person_count = mark_seen_movies(movies, person)                     #   Count the number of movies the person has seen
@@ -63,6 +65,14 @@ class MoviePage(webapp.RequestHandler):
         request         = self.request
         self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
 
+class NamePage(webapp.RequestHandler):
+    def get(self, disp):
+        person_info = Count.all().filter('disp = ', urllib.unquote_plus(disp)).get()
+        if person_info:
+            p = MoviePage()
+            p.initialize(self.request, self.response)
+            p.show_page(person_info.user)
+
 class ComparePage(webapp.RequestHandler):
     def get(self, person, other):
         person = users.User(urllib.unquote_plus(person))                        # At least one name must be specified
@@ -73,7 +83,7 @@ class ComparePage(webapp.RequestHandler):
         other_info   = Count.all().filter('user = ', other).get()
         user_info    = Count.all().filter('user = ', user).get()
         if person_info and other_info:
-            if last_download_date() < now - a_day: download_250()               # Download IMDb Top 250 if it's over a day old
+            if last_download_date() < yesterday: download_250()                 # Download IMDb Top 250 if it's over a day old
             movies = read_250_from_db()                                         # Read from the datastore
             count_person = mark_seen_movies(movies, person, 'person')           # Mark the number of movies person has seen
             count_other  = mark_seen_movies(movies, other , 'other' )           # Mark the number of movies other has seen
@@ -188,6 +198,7 @@ class DataPage(webapp.RequestHandler):
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),
         ('/user/(.+)',              MoviePage),
+        ('/name/(.+)',              NamePage),
         ('/data/(.+)/(.+)',         DataPage),
         ('/compare/([^/]+)/?(.+)?', ComparePage),
         ('/login',                  LoginPage),

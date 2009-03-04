@@ -53,6 +53,8 @@ class MoviePage(webapp.RequestHandler):
     def show_page(self, person = None):
         if last_download_date() < yesterday: download_250()                     # If we downloaded over a day ago,
         movies = read_250_from_db()                                             # Read from the datastore
+        compare_days = 10                                                       # Number of days prior to compare with
+        new_movies = extract_new(movies, read_250_from_db(compare_days))        # Extract new movies since compare_days ago
         if person:                                                              # If it's movies for a person,
             person_count = mark_seen_movies(movies, person)                     #   Count the number of movies the person has seen
             person_info  = user_prop(person, set_count = person_count)          #   and save it in the datastore
@@ -116,9 +118,10 @@ def download_250():
     except:
         pass
 
-def read_250_from_db():
-    top = Top250.all().order('-time').get()
-    return top and list(decode(line) for line in top.data.split('\n')) or ()
+def read_250_from_db(n=None):
+    q = Top250.all().order('-time')                                                 # Want the most recent
+    top = n and q.filter('time < ', now - datetime.timedelta(n)).get() or q.get()   # before n 'days'
+    return top and list(decode(line) for line in top.data.split('\n')) or ()        # Decode it and send it back
 
 def last_download_date():
     top = Top250.all().order('-time').get()
@@ -131,6 +134,10 @@ def mark_seen_movies(movies, user, param='seen'):                               
         movie[param] = seen.get(movie['url'], False)                                # Mark the seen movies in the full 250 movie list
         if movie[param]: count += 1                                                 # Count movies in the 250 that the user has seen
     return count                                                                    # Return the seen count
+
+def extract_new(new, old):
+    urls = dict.fromkeys((movie['url'] for movie in old),1)
+    return tuple(movie for movie in new if not movie['url'] in urls)
 
 def get_recos(movies, param='seen'):
     index = dict((v,i) for i,v in enumerate(recodata.movies))

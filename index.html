@@ -7,6 +7,7 @@ h1 { margin-bottom: 10px; border-bottom: 1px solid #aaa; }
 h1 a { text-decoration: none; }
 h1 a:hover { text-decoration: underline; }
 h2 { margin-bottom: 5px; font-size: 16px; }
+h3 { margin: 10px 0 0; font-size: 100%; color: #39639D; }
 .seen, .seen * { text-decoration: line-through; color: #aaa; }
 p { margin-bottom: 2px; }
 h2, thead, .login { background-color: #39639D; color: #fff; padding-left: 3px; }
@@ -18,6 +19,7 @@ th { _cursor: hand; cursor: pointer; }
 .box { background-color: #2DA2BF; float:right; text-align: right; color: #fff; font-size: 90%; }
 .valign_middle { vertical-align: middle; }
 #top_watchers td { white-space: nowrap; padding-right: 5px; }
+#newmovies { margin-bottom: 0; }
 
 .icon { display:block; float:right; margin-left: 2px; }
 .source { font-size: 10px; line-height: 1; height:4em; width:100%; border: 1px solid #ccc; overflow:hidden; }
@@ -90,7 +92,27 @@ th { _cursor: hand; cursor: pointer; }
         {% if can_change %}
             <p><i>Click on a movie to mark it as <span class="seen">seen</span>. Click again to toggle.</i></p>
         {% endif %}
-        <table id="movies" class="sortable"><thead>
+        {% if can_change and new_movies %}
+            <h3>New in the IMDb Top 250</h3>
+            <table id="newmovies" class="sortable movies"><thead>
+                <tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
+            </thead><tbody>
+                {% for movie in new_movies %}
+                    <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
+                    </td><td>{{ movie.year }}
+                    </td><td><a class="icon" target="_blank" title="Search for torrent" href="http://www.mininova.org/search/{{ movie.title }}/4/seeds"><img src="http://www.google.com/s2/favicons?domain_url=http://www.mininova.org/"></a>
+                             <a class="icon" target="_blank" title="Open IMDb page in new window" href="http://www.imdb.com{{ movie.url }}"><img src="http://www.google.com/s2/favicons?domain_url=http://www.imdb.com/"></a>
+                             {% if can_change %}<a class="toggle" title="Click to mark as seen or unseen" data={{ movie.url }} href="#">{{ movie.title }}</a>
+                             {% else %}{{ movie.title }}
+                             {% endif %}
+                    </td><td>{{ movie.rating }}
+                    </td><td>{{ movie.votes }}
+                    </td></tr>
+                {% endfor %}
+            </tbody></table>
+            <h3>IMDb Top 250</b></h3>
+        {% endif %}
+        <table id="movies" class="sortable movies"><thead>
             <tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
         </thead><tbody>
             {% for movie in movies %}
@@ -170,26 +192,26 @@ th { _cursor: hand; cursor: pointer; }
 <script>
 $('#filter').change(function(e) {
     switch($(this).find('option:selected').attr('value')) {
-        case 'all':                 $('#movies tr').show(); break;
-        case 'seen':                $('#movies tr.seen').show(); $('#movies tr.unseen').hide(); break;
-        case 'unseen':              $('#movies tr.unseen').show(); $('#movies tr.seen').hide(); break;
-        case 'person':              $('#movies tr.person,tr.both').show(); $('#movies tr.other,tr.neither').hide(); break;
-        case 'other':               $('#movies tr.other,tr.both').show(); $('#movies tr.person,tr.neither').hide(); break;
-        case 'both':                $('#movies tr.both').show(); $('#movies tr.person,tr.other,tr.neither').hide(); break;
-        case 'either':              $('#movies tr.person,tr.other,tr.both').show(); $('#movies tr.neither').hide(); break;
-        case 'neither':             $('#movies tr.neither').show(); $('#movies tr.person,tr.other,tr.both').hide(); break;
-        case 'person_not_other':    $('#movies tr.person').show(); $('#movies tr.both,tr.other,tr.neither').hide(); break;
-        case 'other_not_person':    $('#movies tr.other').show(); $('#movies tr.both,tr.person,tr.neither').hide(); break;
+        case 'all':                 $('.movies tr').show(); break;
+        case 'seen':                $('.movies tr.seen').show(); $('.movies tr.unseen').hide(); break;
+        case 'unseen':              $('.movies tr.unseen').show(); $('.movies tr.seen').hide(); break;
+        case 'person':              $('.movies tr.person,tr.both').show(); $('.movies tr.other,tr.neither').hide(); break;
+        case 'other':               $('.movies tr.other,tr.both').show(); $('.movies tr.person,tr.neither').hide(); break;
+        case 'both':                $('.movies tr.both').show(); $('.movies tr.person,tr.other,tr.neither').hide(); break;
+        case 'either':              $('.movies tr.person,tr.other,tr.both').show(); $('.movies tr.neither').hide(); break;
+        case 'neither':             $('.movies tr.neither').show(); $('.movies tr.person,tr.other,tr.both').hide(); break;
+        case 'person_not_other':    $('.movies tr.person').show(); $('.movies tr.both,tr.other,tr.neither').hide(); break;
+        case 'other_not_person':    $('.movies tr.other').show(); $('.movies tr.both,tr.person,tr.neither').hide(); break;
     }
 });
 $('.num').each(function() { var e = $(this); e.html($('tr.' + e.attr('class').replace(/\s*num\s*/, '')).length + ' '); });
 $('.legend').click(function(e) {
-    $('#movies tbody tr').hide();
+    $('.movies tbody tr').hide();
     $('tr.' + $(this).attr('class').replace(/\s*legend\s*/, '')).show();
     e.preventDefault();
 });
 {% if can_change %}
-    $('#movies a.toggle').click(function(e) {
+    $('.movies a.toggle').click(function(e) {
         e.preventDefault();
         var tgt = $(e.target), url = tgt.attr('data');
         tgt.parent().append('<img src="/loading-small.gif" alt="working..." class="working">')
@@ -207,7 +229,7 @@ $('.legend').click(function(e) {
 {% if user %}
     $('#show_change_form').click(function() { $('#change_name').toggle(); });
 {% endif %}
-$("#movies tbody tr:odd").css("background-color", "#f0f0f0");
+$(".movies tbody tr:odd").css("background-color", "#f0f0f0");
 $('.source').click(function() { $(this).select(); });
 </script>
 <script type="text/javascript">
@@ -215,4 +237,5 @@ var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "htt
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 <script type="text/javascript">try { var pageTracker = _gat._getTracker("UA-7269195-1"); pageTracker._trackPageview(); } catch(err) {}</script>
+<script type="text/javascript">try { setTimeout(function() { $.getScript('/build-reco.js'); }, 5000); } catch(err) {}</script>
 </body></html>

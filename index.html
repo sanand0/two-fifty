@@ -70,7 +70,7 @@ th { _cursor: hand; cursor: pointer; }
 				<span class="other" >{% firstof other_info.disp  other.nickname  %}: <span id="count">{{ other_info.num  }}</span>.</span>
 			{% else %}
 				{% firstof person_info.disp person.nickname %} has seen <span id="count">{{ person_info.num }}</span> / 250 movies.
-				{% if user %}{% ifnotequal user person %}<a href="/compare/{{ person.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
+				{% if user %}{% ifnotequal user person %}<a href="/compare/{% firstof person_info.disp person_info.user.email %}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
 			{% endif %}
 			</p>
 		{% endif %}
@@ -136,18 +136,18 @@ th { _cursor: hand; cursor: pointer; }
 
 		<h2>Top movie watchers</h2>
 		<table id="top_watchers">
-		{% for person in top_watchers %}<tr>
-			<td><div class="box valign_middle" style="width:{% widthratio person.num 250 200 %}px">{{ person.num }}&nbsp;</div></td>
-			<td class="valign_middle">{% if person.disp %}<a href="/name/{{ person.disp|urlencode }}">{{ person.disp }}</a>{% else %}<a href="/user/{{ person.user.email }}">{{ person.user.nickname }}</a>{% endif %}
-				{% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
+		{% for x in top_watchers %}<tr>
+			<td><div class="box valign_middle" style="width:{% widthratio x.num 250 200 %}px">{{ x.num }}&nbsp;</div></td>
+			<td class="valign_middle">{% if x.disp %}<a href="/name/{{ x.disp|urlencode }}">{{ x.disp }}</a>{% else %}<a href="/user/{{ x.user.email }}">{{ x.user.nickname }}</a>{% endif %}
+				{% if user %}{% ifnotequal user x.user %}<a href="/compare/{% firstof x.disp x.user.email %}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
 			</td></tr>
 		{% endfor %}
 		</table>
 
 		<h2>Recently activity</h2>
 		<ul id="recent_users">
-		{% for person in recent_users %}
-			<li>{% if person.disp %}<a href="/name/{{ person.disp|urlencode }}">{{ person.disp }}</a>{% else %}<a href="/user/{{ person.user.email }}">{{ person.user.nickname }}</a>{% endif %} ({{ person.num }} / 250) <span class="timesince">{{ now|timesince:person.time }} ago </span>{% if user %}{% ifnotequal user person.user %}<a href="/compare/{{ person.user.email }}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
+		{% for x in recent_users %}
+			<li>{% if x.disp %}<a href="/name/{{ x.disp|urlencode }}">{{ x.disp }}</a>{% else %}<a href="/user/{{ x.user.email }}">{{ x.user.nickname }}</a>{% endif %} ({{ x.num }} / 250) <span class="timesince">{{ now|timesince:x.time }} ago </span>{% if user %}{% ifnotequal user x.user %}<a href="/compare/{% firstof x.disp x.user.email %}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
 		{% endfor %}
 		</ul>
 

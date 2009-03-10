@@ -30,7 +30,7 @@ class MoviePage(webapp.RequestHandler):
     #              user   = who you are logged in as
     def get(self, person=user):
         if person == user: self.show_page(person)
-        else: self.show_page(users.User(urllib.unquote_plus(person)))
+        else: self.show_page(users.User(urllib.unquote(person)))
 
     def post(self):
         url, disp = self.request.get('movie'), self.request.get('disp')
@@ -45,6 +45,7 @@ class MoviePage(webapp.RequestHandler):
                 user_prop(user, change_count=+1)
             self.response.out.write(url)
         elif user and disp:
+            # TODO: disp cannot contain @, /, ...
             if all(ord(c) < 128 for c in disp):                                 # Ensure that disp is pure ascii. Django templates croak otherwise
                 user_prop(user, set_disp = disp)                                # Change display name for user
                 self.redirect('/')                                              # Go back to user's page
@@ -70,22 +71,25 @@ class MoviePage(webapp.RequestHandler):
 
 class NamePage(webapp.RequestHandler):
     def get(self, disp):
-        person_info = Count.all().filter('disp = ', urllib.unquote_plus(disp)).get()
+        person_info = Count.all().filter('disp = ', urllib.unquote(disp)).get()
         if person_info:
             p = MoviePage()
             p.initialize(self.request, self.response)
             p.show_page(person_info.user)
 
+def from_disp_or_email(name):
+    name = urllib.unquote(name)
+    if name.find('@') > 0: return Count.all().filter('user = ', users.User(name)).get()
+    else:                  return Count.all().filter('disp = ', name).get()
+
 class ComparePage(webapp.RequestHandler):
     def get(self, person, other):
-        person = users.User(urllib.unquote_plus(person))                        # At least one name must be specified
-        if not other: person, other = user, person                              # The other is the current user by default
-        else: other = users.User(urllib.unquote_plus(other))
-
-        person_info  = Count.all().filter('user = ', person).get()
-        other_info   = Count.all().filter('user = ', other).get()
+        person_info  = from_disp_or_email(person)                               # person can be disp name or email ID (needs @ -- shouldn't be nickname)
         user_info    = Count.all().filter('user = ', user).get()
+        if other: other_info = from_disp_or_email(other)
+        else: person_info, other_info = user_info, person_info                  # The other is the current user by default
         if person_info and other_info:
+            person, other = person_info.user, other_info.user
             if last_download_date() < yesterday: download_250()                 # Download IMDb Top 250 if it's over a day old
             movies = read_250_from_db()                                         # Read from the datastore
             count_person = mark_seen_movies(movies, person, 'person')           # Mark the number of movies person has seen
@@ -210,7 +214,7 @@ class DataPage(webapp.RequestHandler):
                 userlist = Count.all().fetch(1000)
                 self.response.out.write(template.render('users.txt', locals()))
         else:
-            person      = users.User(urllib.unquote_plus(person))
+            person      = users.User(urllib.unquote(person))
             person_info = Count.all().filter('user = ', person).get()
             if person_info:
                 person_disp = person_info.disp or person.nickname()

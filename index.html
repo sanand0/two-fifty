@@ -22,8 +22,8 @@ th { _cursor: hand; cursor: pointer; }
 #newmovies { margin-bottom: 0; }
 
 .mi, .im { display:block; float:right; margin-left: 2px; width: 16px; height: 16px; }
-.mi { background: url('http://www.google.com/s2/favicons?domain_url=http://www.mininova.org/'); }
-.im { background: url('http://www.google.com/s2/favicons?domain_url=http://www.imdb.com/'); }
+.mi { background: url(http://www.mininova.org/favicon.ico); }
+.im { background: url(http://www.imdb.com/favicon.ico); }
 .source { font-size: 10px; line-height: 1; height:4em; width:100%; border: 1px solid #ccc; overflow:hidden; }
 .widget-name { color: #39639D; font-weight: bold; }
 
@@ -41,7 +41,7 @@ th { _cursor: hand; cursor: pointer; }
 </head><body>
 <div class="container_16">
 	<div class="grid_16 header">
-		<h1>Track the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a>{% if other %}:
+		<h1><a href="/">Track the IMDb Top 250</a>{% if other %}:
 			<span class="person">{% firstof person_info.disp person.nickname %}</span> vs <span class="other">{% firstof other_info.disp other.nickname %}</span>
 		{% endif %}
 		{% ifnotequal request.path "/" %}<a href="/" class="home">Home</a>{% endifnotequal %}
@@ -91,7 +91,7 @@ th { _cursor: hand; cursor: pointer; }
 {% for movie in new_movies %}
 <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
 </td><td>{{ movie.year }}
-</td><td><a class="mi" href="http://www.mininova.org/search/{{ movie.title }}/4/seeds"></a><a class="im" href="http://www.imdb.com{{ movie.url }}"></a>
+</td><td><a class="im" href="http://www.imdb.com{{ movie.url }}"></a>
 {% if can_change %}<a class="toggle" data={{ movie.url }} href="#">{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
 </td><td>{{ movie.rating }}
 </td><td>{{ movie.votes }}
@@ -186,6 +186,7 @@ th { _cursor: hand; cursor: pointer; }
 <script src="http://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.1/jquery.min.js"></script>
 <script>
+$('.login').click(function() { pageTracker._trackPageview('/login'); });
 $('#filter').change(function(e) {
 	switch($(this).find('option:selected').attr('value')) {
 		case 'all': 				$('.movies tr').show(); break;
@@ -235,6 +236,10 @@ $('.source').click(function() { $(this).select(); });
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
-<script type="text/javascript">try { var pageTracker = _gat._getTracker("UA-7269195-1"); pageTracker._trackPageview(); } catch(err) {}</script>
+<script type="text/javascript">try {
+    var pageTracker = _gat._getTracker("UA-7269195-1");
+    pageTracker._setVar("{% if user %}logged-in{% else %}logged-out{% endif %}");
+    pageTracker._trackPageview();
+} catch(err) {}</script>
 <!-- script type="text/javascript">try { setTimeout(function() { $.getScript('/build-reco.js'); }, 5000); } catch(err) {}</script -->
 </body></html>

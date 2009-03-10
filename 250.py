@@ -8,6 +8,7 @@ from google.appengine.api.urlfetch_errors import *
 user            = users.get_current_user()
 now             = datetime.datetime.now()
 yesterday       = now - datetime.timedelta(1)
+page            = 'index.html'
 
 class Top250(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,
@@ -65,7 +66,7 @@ class MoviePage(webapp.RequestHandler):
         top_watchers    = get_top_watchers()
         recent_users    = get_recent_users()
         request         = self.request
-        self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
+        self.response.out.write(template.render(page, dict(locals().items() + globals().items())))
 
 class NamePage(webapp.RequestHandler):
     def get(self, disp):
@@ -91,7 +92,7 @@ class ComparePage(webapp.RequestHandler):
             count_other  = mark_seen_movies(movies, other , 'other' )           # Mark the number of movies other has seen
             top_watchers = get_top_watchers()
             recent_users = get_recent_users()
-            self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
+            self.response.out.write(template.render(page, dict(locals().items() + globals().items())))
 
 def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
 def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))

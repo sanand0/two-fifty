@@ -1,7 +1,7 @@
 import wsgiref.handlers, urllib, re, datetime, logging, recodata
 from BeautifulSoup                        import BeautifulSoup
 from google.appengine.ext                 import webapp, db
-from google.appengine.api                 import users, urlfetch
+from google.appengine.api                 import users, urlfetch, memcache
 from google.appengine.ext.webapp          import template
 from google.appengine.api.urlfetch_errors import *
 
@@ -62,8 +62,8 @@ class MoviePage(webapp.RequestHandler):
         else: person_info = None
         user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
         can_change      = user==person and user
-        top_watchers    = Count.all().order('-num').fetch(20)
-        recent_users    = Count.all().order('-time').fetch(10)
+        top_watchers    = get_top_watchers()
+        recent_users    = get_recent_users()
         request         = self.request
         self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
 
@@ -89,12 +89,30 @@ class ComparePage(webapp.RequestHandler):
             movies = read_250_from_db()                                         # Read from the datastore
             count_person = mark_seen_movies(movies, person, 'person')           # Mark the number of movies person has seen
             count_other  = mark_seen_movies(movies, other , 'other' )           # Mark the number of movies other has seen
-            top_watchers = Count.all().order('-num').fetch(20)
-            recent_users = Count.all().order('-time').fetch(10)
+            top_watchers = get_top_watchers()
+            recent_users = get_recent_users()
             self.response.out.write(template.render('index.html', dict(locals().items() + globals().items())))
 
 def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
 def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
+
+def get_top_watchers():
+  data = memcache.get('top_watchers')
+  if data is not None:
+    return data
+  else:
+    data = Count.all().order('-num').fetch(20)
+    memcache.add('top_watchers', data, 3600)
+    return data
+
+def get_recent_users():
+  data = memcache.get('recent_users')
+  if data is not None:
+    return data
+  else:
+    data = Count.all().order('-time').fetch(10)
+    memcache.add('recent_users', data, 3600)
+    return data
 
 def download_250():
     '''Downloads the top 250 movies on IMDb and saves it in the data store'''

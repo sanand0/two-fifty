@@ -106,11 +106,8 @@ th { _cursor: hand; cursor: pointer; }
 {% for movie in movies %}
 <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
 </td><td>{{ movie.year }}
-</td><td><a class="mi" href="http://www.mininova.org/search/{{ movie.title }}/4/seeds"></a>
-<a class="im" href="http://www.imdb.com{{ movie.url }}"></a>
-{% if can_change %}<a class="toggle" data={{ movie.url }} href="#">{{ movie.title }}</a>
-{% else %}{{ movie.title }}
-{% endif %}
+</td><td><a class="im" href="http://www.imdb.com{{ movie.url }}"></a>
+{% if can_change %}<a class="toggle" data={{ movie.url }} href="#">{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
 </td><td>{{ movie.rating }}
 </td><td>{{ movie.votes }}
 </td></tr>
@@ -209,6 +206,7 @@ $('.legend').click(function(e) {
 	$('tr.' + $(this).attr('class').replace(/\s*legend\s*/, '')).show();
 	e.preventDefault();
 });
+$('.movies tr').find('td:eq(2)').each(function() { $(this).prepend('<a class="mi" href="http://www.mininova.org/search/' + $(this).text() + '/4/seeds"></a>'); });
 $('.movies a.mi').attr('title', 'Search for torrent').attr('target', '_blank');
 $('.movies a.im').attr('title', 'Open IMDb page in new window').attr('target', '_blank');
 {% if can_change %}

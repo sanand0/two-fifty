@@ -19,10 +19,6 @@ handlers:
   static_files: count.js
   upload: count.js
 
-- url: /movie-count-widget.png
-  static_files: movie-count-widget.png
-  upload: movie-count-widget.png
-
 - url: /seen.js
   static_files: seen.js
   upload: seen.js
@@ -31,13 +27,29 @@ handlers:
   static_files: build-reco.js
   upload: build-reco.js
 
+- url: /movie-count-widget.png
+  static_files: movie-count-widget.png
+  upload: movie-count-widget.png
+
 - url: /movie-seen-widget.png
   static_files: movie-seen-widget.png
   upload: movie-seen-widget.png
 
+- url: /track-top-250.png
+  static_files: track-top-250.png
+  upload: track-top-250.png
+
+- url: /login-button.png
+  static_files: login-button.png
+  upload: login-button.png
+
 - url: /robots.txt
   static_files: robots.txt
   upload: robots.txt
+
+- url: /google4a8c0507e54bfbd4.html
+  static_files: google4a8c0507e54bfbd4.html
+  upload: google4a8c0507e54bfbd4.html
 
 - url: /build-reco
   script: build-reco.py

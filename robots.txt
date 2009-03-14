@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /name
+Disallow: /user
+Disallow: /compare
+Disallow: /data
+Disallow: /login
+Disallow: /logout

@@ -8,7 +8,7 @@ from google.appengine.api.urlfetch_errors import *
 user            = users.get_current_user()
 now             = datetime.datetime.now()
 yesterday       = now - datetime.timedelta(1)
-page            = 'index.html'
+page            = 'index2.html'
 
 class Top250(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,

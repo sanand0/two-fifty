@@ -132,7 +132,7 @@ def download_250():
                 movies.append({
                     'url': (x[1] for x in movie.attrs if x[0] == 'href').next(),    # URL will be used as the unique identifier
                     'title': movie.string,                                          # Only movie name, not the year. Kept HTML encoded.
-                    'year': re.search(r'\((.*)\)', str(cell[2].font)).group(1),     # Structure: <font><a..>Movie name</a> (2004/I)</font>
+                    'year': re.search(r'\((\d+).*?\)', str(cell[2].font)).group(1), # Structure: <font><a..>Movie name</a> (2004/I)</font>
                     'rank': cell[0].font.b.string.replace('.', ''),                 # Structure: <font><b>250.</b></font>
                     'rating': cell[1].font.string,                                  # Structure: <font>9.0</font>
                     'votes': cell[3].font.string,                                   # Structure: <font>100,000</font>

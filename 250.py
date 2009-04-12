@@ -1,4 +1,4 @@
-import wsgiref.handlers, urllib, re, datetime, logging, recodata
+import wsgiref.handlers, urllib, re, datetime, logging, recodata, operator
 from BeautifulSoup                        import BeautifulSoup
 from google.appengine.ext                 import webapp, db
 from google.appengine.api                 import users, urlfetch, memcache
@@ -24,6 +24,7 @@ class Count(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
     num  = db.IntegerProperty    (required=True)                        # Number of movies seen, when last counted
     disp = db.StringProperty     ()                                     # Display name
+    rel  = db.TextProperty       ()                                     # TSV of relation => user
 
 class MoviePage(webapp.RequestHandler):
     # Conventions: person = whose information is shown on the page
@@ -33,39 +34,46 @@ class MoviePage(webapp.RequestHandler):
         else: self.show_page(users.User(urllib.unquote(person)))
 
     def post(self):
-        url, disp = self.request.get('movie'), self.request.get('disp')
-        if user and url:
-            # Toggles the movie watched state for the user
-            seen = Seen.all().filter('user = ', user).filter('url = ', url).get()
+        movie, disp = (self.request.get(x) for x in ('movie', 'disp'))
+        if not user:                                                            # Must be logged in to make any changes
+            self.response.out.write('Not logged in')
+            return
+
+        if movie:                                                               # Toggle the movie watched state for the user
+            seen = Seen.all().filter('user = ', user).filter('url = ', movie).get()
             if seen:
                 seen.delete()
                 user_prop(user, change_count=-1)
             else:
-                Seen(user=user, time=now, url=url).put()
+                Seen(user=user, time=now, url=movie).put()
                 user_prop(user, change_count=+1)
-            self.response.out.write(url)
-        elif user and disp:
-            # TODO: disp cannot contain @, /, ...
+            self.response.out.write(movie)
+
+        elif disp:                                                              # Change the display name. TODO: disp cannot contain @, /, ...
             if all(ord(c) < 128 for c in disp):                                 # Ensure that disp is pure ascii. Django templates croak otherwise
                 user_prop(user, set_disp = disp)                                # Change display name for user
                 self.redirect('/')                                              # Go back to user's page
             else: self.response.out.write('Use only letters and numbers')       # Notify error
-        else: self.response.out.write('Not logged in, or no URL');
 
     def show_page(self, person = None):
         if last_download_date() < yesterday: download_250()                     # If we downloaded over a day ago,
         movies = read_250_from_db()                                             # Read from the datastore
         compare_days = 10                                                       # Number of days prior to compare with
         new_movies = extract_new(movies, read_250_from_db(compare_days))        # Extract new movies since compare_days ago
+        user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
+        user_rel, user_followers = None, None
+        if user_info:
+            user_rel    = rel2dict(user_info.rel)
+            if user==person: user_followers = get_follower_info(user_rel)
         if person:                                                              # If it's movies for a person,
             person_count = mark_seen_movies(movies, person)                     #   Count the number of movies the person has seen
             person_info  = user_prop(person, set_count = person_count)          #   and save it in the datastore
+            person_info  = mark_rel([person_info], user_rel)[0]                 # Mark the rel tags
             person_recos = get_recos(movies)[0:10]
         else: person_info = None
-        user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
         can_change      = user==person and user
-        top_watchers    = get_top_watchers()
-        recent_users    = get_recent_users()
+        top_watchers    = mark_rel(get_top_watchers(), user_rel)
+        recent_users    = mark_rel(get_recent_users(), user_rel)
         request         = self.request
         self.response.out.write(template.render(page, dict(locals().items() + globals().items())))
 
@@ -76,6 +84,30 @@ class NamePage(webapp.RequestHandler):
             p = MoviePage()
             p.initialize(self.request, self.response)
             p.show_page(person_info.user)
+
+def rel2dict(s):
+    rel = {}
+    for line in (s and s.split('\n') or []):
+        fields = line.split('\t')
+        rel.setdefault(fields[0], {})[fields[1]] = fields[2]
+    return rel
+
+def dict2rel(rel):
+    s = []
+    for tag in rel:
+        for key in rel[tag]:
+            s.append(tag + '\t' + key + '\t' + rel[tag][key])
+    return '\n'.join(s)
+
+def get_follower_info(rel):
+    if 'follower' not in rel: return []
+    follower_info = []
+    for other in rel['follower']:
+        follower_info.append(Count.all().filter('user = ', users.User(other)).get())
+    # return sorted(follower_info, ).reverse()
+    follower_info.sort(key=operator.attrgetter('num'))
+    follower_info.reverse()
+    return follower_info
 
 def from_disp_or_email(name):
     name = urllib.unquote(name)
@@ -98,26 +130,28 @@ class ComparePage(webapp.RequestHandler):
             recent_users = get_recent_users()
             self.response.out.write(template.render(page, dict(locals().items() + globals().items())))
 
-def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
-def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
-
 def get_top_watchers():
-  data = memcache.get('top_watchers')
-  if data is not None:
-    return data
-  else:
-    data = Count.all().order('-num').fetch(20)
-    memcache.add('top_watchers', data, 3600)
+    data = memcache.get('top_watchers')
+    if not data:
+        data = Count.all().order('-num').fetch(20)
+        memcache.add('top_watchers', data, 3600)
     return data
 
 def get_recent_users():
-  data = memcache.get('recent_users')
-  if data is not None:
+    data = memcache.get('recent_users')
+    if not data:
+        data = Count.all().order('-time').fetch(10)
+        memcache.add('recent_users', data, 3600)
     return data
-  else:
-    data = Count.all().order('-time').fetch(10)
-    memcache.add('recent_users', data, 3600)
-    return data
+
+def mark_rel(users, rel):
+    if not rel: return users
+    for user in users:
+        for tag in rel:
+            other = user.user.email()
+            if other in rel[tag]:
+                user.__setattr__(tag, rel[tag][other])
+    return users
 
 def download_250():
     '''Downloads the top 250 movies on IMDb and saves it in the data store'''
@@ -137,11 +171,13 @@ def download_250():
                     'rating': cell[1].font.string,                                  # Structure: <font>9.0</font>
                     'votes': cell[3].font.string,                                   # Structure: <font>100,000</font>
                 })
+            def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
             Top250(time=now, data='\n'.join(encode(movie) for movie in movies)).put()
     except:
         pass
 
 def read_250_from_db(n=None):
+    def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
     q = Top250.all().order('-time')                                                 # Want the most recent
     top = n and q.filter('time < ', now - datetime.timedelta(n)).get() or q.get()   # before n 'days'
     return top and list(decode(line) for line in top.data.split('\n')) or ()        # Decode it and send it back
@@ -225,6 +261,30 @@ class DataPage(webapp.RequestHandler):
                     count  = mark_seen_movies(movies, person)
                     self.response.out.write(template.render('seen.txt', locals()))
 
+class FollowPage(webapp.RequestHandler):
+    def get(self, request, other):
+        if user:
+            if request == 'follow': tag, value = 'follower', '1'
+            else:                   tag, value = 'follower', None
+            rev = 'is-' + tag + '-of'
+            other = urllib.unquote(other)
+            user_info   = Count.all().filter('user = ', user).get()
+            other_info  = Count.all().filter('user = ', users.User(other)).get()
+            if other_info:
+                user_rel        = rel2dict(user_info.rel)
+                other_rel       = rel2dict(other_info.rel)
+                if value:       user_rel.setdefault(tag, {})[other] = other_rel.setdefault(rev, {})[user.email()] = value
+                else:           del user_rel[tag][other],  other_rel[rev][user.email()]
+                user_info.rel   = dict2rel(user_rel)
+                other_info.rel  = dict2rel(other_rel)
+                user_info.put()
+                other_info.put()
+        self.redirect('/')
+
+class RefreshPage(webapp.RequestHandler):
+    def get(self):
+        download_250()
+
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),
         ('/user/(.+)',              MoviePage),
@@ -233,6 +293,8 @@ application = webapp.WSGIApplication([
         ('/compare/([^/]+)/?(.+)?', ComparePage),
         ('/login',                  LoginPage),
         ('/logout',                 LogoutPage),
+        ('/(follow|unfollow)/(.+)', FollowPage),
+        ('/refresh',                RefreshPage),
     ],
     debug=True)
 wsgiref.handlers.CGIHandler().run(application)

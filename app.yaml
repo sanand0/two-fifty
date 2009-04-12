@@ -54,5 +54,9 @@ handlers:
 - url: /build-reco
   script: build-reco.py
 
+- url: /refresh
+  script: 250.py
+  login: admin
+
 - url: /.*
   script: 250.py

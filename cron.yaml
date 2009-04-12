@@ -1,0 +1,4 @@
+cron:
+- description: daily refresh of IMDb Top 250
+  url: /refresh
+  schedule: every 24 hours

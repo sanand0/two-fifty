@@ -263,11 +263,12 @@ $('#filter').change(function(e) {
 {% if can_change %}
 $('.movies a.x').attr('title', 'Click to mark as seen or unseen').click(function(e) {
 	e.preventDefault();
-	var tgt = $(e.target), url = tgt.attr('data');
+	var url = $(e.target).attr('data'),
+		tgt = $('.movies a.x[data=' + url + ']');
 	tgt.parent().append('<img src="/loading-small.gif" alt="working..." class="working">');
 	$.post('/', {movie: url}, function(response) {
 		if (response == url) {
-			var tr = tgt.parents('tr').eq(0),
+			var tr = tgt.parents('tr'),
 				sc = $('.user-seen-count'),
 				n  = +sc.eq(0).text();
 			if		(tr.hasClass('seen'  )) { tr.addClass('unseen').removeClass('seen'	); n--; }

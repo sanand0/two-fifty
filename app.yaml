@@ -43,6 +43,10 @@ handlers:
   static_files: login-button.png
   upload: login-button.png
 
+- url: /xd-receiver.htm
+  static_files: xd-receiver.htm
+  upload: xd-receiver.htm
+
 - url: /robots.txt
   static_files: robots.txt
   upload: robots.txt

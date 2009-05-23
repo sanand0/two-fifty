@@ -8,7 +8,7 @@ from google.appengine.api.urlfetch_errors import *
 user            = users.get_current_user()
 now             = datetime.datetime.now()
 yesterday       = now - datetime.timedelta(1)
-page            = 'index2.html'
+page            = users.is_current_user_admin() and 'index3.html' or 'index2.html'
 
 class Top250(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,
@@ -57,9 +57,9 @@ class MoviePage(webapp.RequestHandler):
 
     def show_page(self, person = None):
         if last_download_date() < yesterday: download_250()                     # If we downloaded over a day ago,
-        movies = read_250_from_db()                                             # Read from the datastore
-        compare_days = 10                                                       # Number of days prior to compare with
-        new_movies = extract_new(movies, read_250_from_db(compare_days))        # Extract new movies since compare_days ago
+        movies          = read_250_from_db()                                    # Read from the datastore
+        compare_days    = 10                                                    # Number of days prior to compare with
+        new_movies      = extract_new(movies, read_250_from_db(compare_days))   # Extract new movies since compare_days ago
         user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
         user_rel, user_followers = None, None
         if user_info:

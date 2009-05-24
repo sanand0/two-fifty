@@ -8,7 +8,7 @@ from google.appengine.api.urlfetch_errors import *
 user            = users.get_current_user()
 now             = datetime.datetime.now()
 yesterday       = now - datetime.timedelta(1)
-page            = users.is_current_user_admin() and 'index3.html' or 'index2.html'
+page            = 'index2.html'
 
 class Top250(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,
@@ -104,7 +104,6 @@ def get_follower_info(rel):
     follower_info = []
     for other in rel['follower']:
         follower_info.append(Count.all().filter('user = ', users.User(other)).get())
-    # return sorted(follower_info, ).reverse()
     follower_info.sort(key=operator.attrgetter('num'))
     follower_info.reverse()
     return follower_info

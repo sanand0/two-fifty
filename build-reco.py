@@ -1,4 +1,4 @@
-import wsgiref.handlers, logging, recodata
+import wsgiref.handlers, logging
 from google.appengine.ext                 import webapp, db
 
 class Reco(db.Model):

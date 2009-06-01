@@ -8,7 +8,7 @@ from google.appengine.api.urlfetch_errors import *
 user            = users.get_current_user()
 now             = datetime.datetime.now()
 yesterday       = now - datetime.timedelta(1)
-page            = 'index2.html'
+page            = 'index.html'
 
 class Top250(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,
@@ -25,6 +25,10 @@ class Count(db.Model):
     num  = db.IntegerProperty    (required=True)                        # Number of movies seen, when last counted
     disp = db.StringProperty     ()                                     # Display name
     rel  = db.TextProperty       ()                                     # TSV of relation => user
+
+class Activity(db.Model):
+    time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
+    data = db.TextProperty       ()                                     # TSV of relation => user
 
 class MoviePage(webapp.RequestHandler):
     # Conventions: person = whose information is shown on the page
@@ -281,8 +285,23 @@ class FollowPage(webapp.RequestHandler):
         self.redirect('/')
 
 class RefreshPage(webapp.RequestHandler):
+    def get(self): download_250()
+
+class FeedRefreshPage(webapp.RequestHandler):
     def get(self):
-        download_250()
+        title = dict(((movie['url'], movie['title']) for movie in read_250_from_db()))
+        count, activity = 0, {}
+        for seen in Seen.all().filter('time >=', yesterday):
+            activity.setdefault(seen.user, []).append({'title':title.get(seen.url, 'some movie'), 'url':seen.url})
+            count += 1
+        activity = activity.items()
+        rss = template.render('feed.xml', { 'updated': now, 'activity': activity, 'count': count, 'people': len(activity) })
+        Activity(time=now, data=rss).put()
+
+class FeedPage(webapp.RequestHandler):
+    def get(self):
+        self.response.headers["Content-Type"] = "text/xml"
+        self.response.out.write(Activity.all().order('-time').get().data)
 
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),
@@ -294,6 +313,8 @@ application = webapp.WSGIApplication([
         ('/logout',                 LogoutPage),
         ('/(follow|unfollow)/(.+)', FollowPage),
         ('/refresh',                RefreshPage),
+        ('/feed/refresh',           FeedRefreshPage),
+        ('/feed',                   FeedPage),
     ],
     debug=True)
 wsgiref.handlers.CGIHandler().run(application)

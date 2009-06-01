@@ -1,55 +1,117 @@
 <!doctype html>
 <html><head>
-<title>Track IMDb Top 250 movies you have seen</title>
+<title>{% if person %}{% firstof person_info.disp person.nickname %}: {{ person_info.num }} movies on the IMDb Top 250{% else %}Track IMDb Top 250 movies{% endif %}</title>
+<meta name="title" content="{% if person %}{% firstof person_info.disp person.nickname %}: {{ person_info.num }} / IMDb Top 250{% else %}Track IMDb Top 250 movies{% endif %}" />
+<meta name="description" content="Track movies you've seen on the Internet Movie Database (IMDb) Top 250. Get recommendations. Compare your movie watching with others.">
+<link rel="image_src" href="http://i.media-imdb.com/images/nb15/logo2.gif">
 <style>
-html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent;}body{line-height:1;}ol,ul{list-style:none;}blockquote,q{quotes:none;}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}:focus{outline:0;}ins{text-decoration:none;}del{text-decoration:line-through;}table{border-collapse:collapse;border-spacing:0;}.container_12,.container_16{margin-left:auto;margin-right:auto;width:960px;}.grid_1,.grid_2,.grid_3,.grid_4,.grid_5,.grid_6,.grid_7,.grid_8,.grid_9,.grid_10,.grid_11,.grid_12,.grid_13,.grid_14,.grid_15,.grid_16{display:inline;float:left;margin-left:10px;margin-right:10px;}.container_12 .grid_3,.container_16 .grid_4{width:220px;}.container_12 .grid_6,.container_16 .grid_8{width:460px;}.container_12 .grid_9,.container_16 .grid_12{width:700px;}.container_12 .grid_12,.container_16 .grid_16{width:940px;}.alpha{margin-left:0;}.omega{margin-right:0;}.container_12 .grid_1{width:60px;}.container_12 .grid_2{width:140px;}.container_12 .grid_4{width:300px;}.container_12 .grid_5{width:380px;}.container_12 .grid_7{width:540px;}.container_12 .grid_8{width:620px;}.container_12 .grid_10{width:780px;}.container_12 .grid_11{width:860px;}.container_16 .grid_1{width:40px;}.container_16 .grid_2{width:100px;}.container_16 .grid_3{width:160px;}.container_16 .grid_5{width:280px;}.container_16 .grid_6{width:340px;}.container_16 .grid_7{width:400px;}.container_16 .grid_9{width:520px;}.container_16 .grid_10{width:580px;}.container_16 .grid_11{width:640px;}.container_16 .grid_13{width:760px;}.container_16 .grid_14{width:820px;}.container_16 .grid_15{width:880px;}.container_12 .prefix_3,.container_16 .prefix_4{padding-left:240px;}.container_12 .prefix_6,.container_16 .prefix_8{padding-left:480px;}.container_12 .prefix_9,.container_16 .prefix_12{padding-left:720px;}.container_12 .prefix_1{padding-left:80px;}.container_12 .prefix_2{padding-left:160px;}.container_12 .prefix_4{padding-left:320px;}.container_12 .prefix_5{padding-left:400px;}.container_12 .prefix_7{padding-left:560px;}.container_12 .prefix_8{padding-left:640px;}.container_12 .prefix_10{padding-left:800px;}.container_12 .prefix_11{padding-left:880px;}.container_16 .prefix_1{padding-left:60px;}.container_16 .prefix_2{padding-left:120px;}.container_16 .prefix_3{padding-left:180px;}.container_16 .prefix_5{padding-left:300px;}.container_16 .prefix_6{padding-left:360px;}.container_16 .prefix_7{padding-left:420px;}.container_16 .prefix_9{padding-left:540px;}.container_16 .prefix_10{padding-left:600px;}.container_16 .prefix_11{padding-left:660px;}.container_16 .prefix_13{padding-left:780px;}.container_16 .prefix_14{padding-left:840px;}.container_16 .prefix_15{padding-left:900px;}.container_12 .suffix_3,.container_16 .suffix_4{padding-right:240px;}.container_12 .suffix_6,.container_16 .suffix_8{padding-right:480px;}.container_12 .suffix_9,.container_16 .suffix_12{padding-right:720px;}.container_12 .suffix_1{padding-right:80px;}.container_12 .suffix_2{padding-right:160px;}.container_12 .suffix_4{padding-right:320px;}.container_12 .suffix_5{padding-right:400px;}.container_12 .suffix_7{padding-right:560px;}.container_12 .suffix_8{padding-right:640px;}.container_12 .suffix_10{padding-right:800px;}.container_12 .suffix_11{padding-right:880px;}.container_16 .suffix_1{padding-right:60px;}.container_16 .suffix_2{padding-right:120px;}.container_16 .suffix_3{padding-right:180px;}.container_16 .suffix_5{padding-right:300px;}.container_16 .suffix_6{padding-right:360px;}.container_16 .suffix_7{padding-right:420px;}.container_16 .suffix_9{padding-right:540px;}.container_16 .suffix_10{padding-right:600px;}.container_16 .suffix_11{padding-right:660px;}.container_16 .suffix_13{padding-right:780px;}.container_16 .suffix_14{padding-right:840px;}.container_16 .suffix_15{padding-right:900px;}html body * span.clear,html body * div.clear,html body * li.clear,html body * dd.clear{background:none;border:0;clear:both;display:block;float:none;font-size:0;list-style:none;margin:0;padding:0;overflow:hidden;visibility:hidden;width:0;height:0;}.clearfix:after{clear:both;content:'.';display:block;visibility:hidden;height:0;}.clearfix{display:inline-block;}* html .clearfix{height:1%;}.clearfix{display:block;}body{font:13px/1.5 Helvetica,Arial,'Liberation Sans',FreeSans,sans-serif;}a:focus{outline:1px dotted invert;}hr{border-color:#ccc;border-style:solid;border-width:1px 0 0;clear:both;height:0;}h1{font-size:25px;}h2{font-size:23px;}h3{font-size:21px;}h4{font-size:19px;}h5{font-size:17px;}h6{font-size:15px;}ol{list-style:decimal;}ul{list-style:square;}li{margin-left:30px;}p,dl,hr,h1,h2,h3,h4,h5,h6,ol,ul,pre,table,address,fieldset{margin-bottom:20px;}body{margin:20px 0 50px 0;}html{margin-bottom:50px;}a:focus{outline:1px dotted #888;}h2{margin-top:15px;}h2 a{text-decoration:none;}blockquote,.about{margin-bottom:20px;font-style:italic;}blockquote{padding:5px 10px 0;background-color:#eef;}th{vertical-align:bottom;}td,th{text-align:left;padding-right:1em;}.numbers td,.numbers th,td.numbers,th.numbers{text-align:right;padding-left:1em;}table.lines td{border-bottom:1px solid #dbdbff;border-top:1px solid #dbdbff;}table.lines th{border-bottom:1px solid #dbdbff;}tfoot *,thead *,th{font-weight:bold;}input.quizIn{background-color:#f8f8ff;border:1px solid #888;margin-bottom:2px;}.x{color:#888;text-decoration:line-through;}.n{color:#009;text-decoration:none;}#articles_block{background-color:#39639d;height:700px;}#links_block{background-color:#2da2bf;height:700px;}#sites_block{background-color:#da1f28;height:850px;}#micro_block{background-color:#7d3c4a;height:850px;}#popular_block{background-color:#eb641b;height:850px;}#side_block{background-color:#39639d;}#side_block h2{font-size:16px;margin-bottom:0;}@media print{#side_block,#comment-form{display:none;}}.block{margin:4px;padding:6px;color:#fff;overflow:hidden;}.block a{color:#fff;}.block a:visited{color:#d9d9d9;}.block a:active{color:#d4dfef;}.block a:hover{color:#d4dfef;}
-h1 { margin-bottom: 10px; border-bottom: 1px solid #aaa; }
-h1 a { text-decoration: none; }
-h1 a:hover { text-decoration: underline; }
-h2 { margin-bottom: 5px; font-size: 16px; }
-h3 { margin: 10px 0 0; font-size: 100%; color: #39639D; }
-.seen, .seen * { text-decoration: line-through; color: #aaa; }
-p { margin-bottom: 2px; }
-h2, thead, .login { background-color: #39639D; color: #fff; padding-left: 3px; }
-th { _cursor: hand; cursor: pointer; }
-.login { display: block; border: 4px outset #ccf; -moz-border-radius: 50px; text-align: center; text-decoration: none; font-size: 14px; font-weight: bold; }
-.login:hover { border: 4px solid #ccf; }
-.login:active { border: 4px inset #ccf; }
-#change_name { display: none; }
-.box { background-color: #2DA2BF; float:right; text-align: right; color: #fff; font-size: 90%; }
-.valign_middle { vertical-align: middle; }
-#top_watchers td { white-space: nowrap; padding-right: 5px; }
-#newmovies { margin-bottom: 0; }
+/* 960.gs: reset.css */ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outline:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+/* 960.gs: 960.css */	.container_12,.container_16{margin-left:auto;margin-right:auto;width:960px}.grid_1,.grid_2,.grid_3,.grid_4,.grid_5,.grid_6,.grid_7,.grid_8,.grid_9,.grid_10,.grid_11,.grid_12,.grid_13,.grid_14,.grid_15,.grid_16{display:inline;float:left;margin-left:10px;margin-right:10px}.container_12 .grid_3,.container_16 .grid_4{width:220px}.container_12 .grid_6,.container_16 .grid_8{width:460px}.container_12 .grid_9,.container_16 .grid_12{width:700px}.container_12 .grid_12,.container_16 .grid_16{width:940px}.alpha{margin-left:0}.omega{margin-right:0}.container_12 .grid_1{width:60px}.container_12 .grid_2{width:140px}.container_12 .grid_4{width:300px}.container_12 .grid_5{width:380px}.container_12 .grid_7{width:540px}.container_12 .grid_8{width:620px}.container_12 .grid_10{width:780px}.container_12 .grid_11{width:860px}.container_16 .grid_1{width:40px}.container_16 .grid_2{width:100px}.container_16 .grid_3{width:160px}.container_16 .grid_5{width:280px}.container_16 .grid_6{width:340px}.container_16 .grid_7{width:400px}.container_16 .grid_9{width:520px}.container_16 .grid_10{width:580px}.container_16 .grid_11{width:640px}.container_16 .grid_13{width:760px}.container_16 .grid_14{width:820px}.container_16 .grid_15{width:880px}.container_12 .prefix_3,.container_16 .prefix_4{padding-left:240px}.container_12 .prefix_6,.container_16 .prefix_8{padding-left:480px}.container_12 .prefix_9,.container_16 .prefix_12{padding-left:720px}.container_12 .prefix_1{padding-left:80px}.container_12 .prefix_2{padding-left:160px}.container_12 .prefix_4{padding-left:320px}.container_12 .prefix_5{padding-left:400px}.container_12 .prefix_7{padding-left:560px}.container_12 .prefix_8{padding-left:640px}.container_12 .prefix_10{padding-left:800px}.container_12 .prefix_11{padding-left:880px}.container_16 .prefix_1{padding-left:60px}.container_16 .prefix_2{padding-left:120px}.container_16 .prefix_3{padding-left:180px}.container_16 .prefix_5{padding-left:300px}.container_16 .prefix_6{padding-left:360px}.container_16 .prefix_7{padding-left:420px}.container_16 .prefix_9{padding-left:540px}.container_16 .prefix_10{padding-left:600px}.container_16 .prefix_11{padding-left:660px}.container_16 .prefix_13{padding-left:780px}.container_16 .prefix_14{padding-left:840px}.container_16 .prefix_15{padding-left:900px}.container_12 .suffix_3,.container_16 .suffix_4{padding-right:240px}.container_12 .suffix_6,.container_16 .suffix_8{padding-right:480px}.container_12 .suffix_9,.container_16 .suffix_12{padding-right:720px}.container_12 .suffix_1{padding-right:80px}.container_12 .suffix_2{padding-right:160px}.container_12 .suffix_4{padding-right:320px}.container_12 .suffix_5{padding-right:400px}.container_12 .suffix_7{padding-right:560px}.container_12 .suffix_8{padding-right:640px}.container_12 .suffix_10{padding-right:800px}.container_12 .suffix_11{padding-right:880px}.container_16 .suffix_1{padding-right:60px}.container_16 .suffix_2{padding-right:120px}.container_16 .suffix_3{padding-right:180px}.container_16 .suffix_5{padding-right:300px}.container_16 .suffix_6{padding-right:360px}.container_16 .suffix_7{padding-right:420px}.container_16 .suffix_9{padding-right:540px}.container_16 .suffix_10{padding-right:600px}.container_16 .suffix_11{padding-right:660px}.container_16 .suffix_13{padding-right:780px}.container_16 .suffix_14{padding-right:840px}.container_16 .suffix_15{padding-right:900px}html body * span.clear,html body * div.clear,html body * li.clear,html body * dd.clear{background:none;border:0;clear:both;display:block;float:none;font-size:0;list-style:none;margin:0;padding:0;overflow:hidden;visibility:hidden;width:0;height:0}.clearfix:after{clear:both;content:'.';display:block;visibility:hidden;height:0}.clearfix{display:inline-block}* html .clearfix{height:1%}.clearfix{display:block}
+/* 960.gs: text.css modified heavily */
+body { font: 13px/1.5 Georgia, 'Times New Roman', serif; }
+a:focus { outline: 1px dotted invert; }
+p, dl, hr, ol, ul, pre, table, address, fieldset { margin-bottom: 1.5em; }
+hr { border-color: #ccc; border-style: solid; border-width: 1px 0 0; clear: both; height: 0; }
+h1 { font-size: 25px; }
+ol { list-style: decimal; }
+ul { list-style: square; }
+li { margin-left: 30px; }
 
-.mi, .im { display:block; float:right; margin-left: 2px; width: 16px; height: 16px; }
-.mi { background: url(http://www.mininova.org/favicon.ico); }
+/* http://onehub.com/ fix for container to ensure height */
+.container_12:after{clear:both;content:'.';display:block;visibility:hidden;height:0}
+.container_12{display:inline-block}
+* html .container_12{height:1%}
+.container_12{display:block}
+
+.blackbar { background-color: black; color: #eeece1; padding: 1.5em 0; }
+.blackbar a { color: #eeece1; }
+{% if user %}#subheader-bar { display:none; }{% endif %}
+h1 a { display:block; text-indent: -1000px; width:304px; height:60px; background: url('/track-top-250.png'); }
+.login-box { text-align: center; font: bold 16px sans-serif; width:300px; height:38px; padding: 0; background: url('/login-button.png'); }
+.login { display:block; padding-top: 10px; text-decoration: none; }
+input, textarea { background-color: #9bbb59; }
+
+.mainbar h2 { font: bold 16px Geneva, Arial, sans-serif; margin-bottom: 0.5em; border-bottom: 5px solid #4f6228; color: #4f6228; }
+.mainbar a { color: #4f6228; }
+.mainbar .stats { font-style: italic; font-size: 12px; }
+.mainbar .diff, .mainbar .follow, .mainbar .unfollow { text-decoration: none; color: #da1f28; font: bold 11px Geneva,Arial,sans-serif; }
+.mainbar .follow, .mainbar .unfollow  { color: #0000ff; }
+
+.movies { width: 100%; }
+.movies td, .movies th { height: 22px; vertical-align: middle; }
+.movies th { text-align: left; padding: 0 3px; font-weight: normal; }
+.movies th, .box { background-color: #9bbb59; }
+.box { float:right; overflow:hidden; margin-bottom: 0.5em; padding-right: 5px; width: 250px; }
+.box a { display:block; text-align: right; color: #000; text-decoration: none; }
+
+.instructions { color: #4f6228; font-style: italic; }
+#filter { float:right; border: 1px solid #4f6228; border-width: 1px 0 0 1px; }
+#following td, #top_watchers td, #recent_watchers td { padding-right: 1em; }
+
+.ic { display:block; float:right; margin: 0 5px; width: 16px; height: 16px; }
 .im { background: url(http://www.imdb.com/favicon.ico); }
-.source { font-size: 10px; line-height: 1; height:4em; width:100%; border: 1px solid #ccc; overflow:hidden; }
-.widget-name { color: #39639D; font-weight: bold; }
 
-.both { color: #000; font-style: normal; }
-.person { color: #08f; }
-.other { color: #f00; font-style: italic; }
-.neither { color: #999; }
+.seen, .seen a { text-decoration: line-through; color: #c3d69b; }
+.person { color:#4f6228; }
+.both { color: #ddd; font-style: normal; }
+.other { color: #da1f28; font-style: italic; }
+.neither { color: #ddd; }
 
-.timesince { font-style: italic; }
-.diff { text-decoration: none; color: #da1f28; font: bold 12px Calibri,Arial,sans-serif; }
-
-.header { position:relative; }
-.home { position:absolute; right:0; }
+.bottombar h2 { font-size: 23px; margin-bottom: 0.5em; }
+.source { font-size: 11px; width:100%; display:block; }
+.widget-name { color: #9bbb59; font-weight: bold; }
+.icon { float: left; margin-right: 4px; }
+.share_link { font-size: 11px; }
 </style>
 </head><body>
-<div class="container_16">
-	<div class="grid_16 header">
-		<h1><a href="/">Track the IMDb Top 250</a>{% if other %}:
-			<span class="person">{% firstof person_info.disp person.nickname %}</span> vs <span class="other">{% firstof other_info.disp other.nickname %}</span>
-		{% endif %}
-		{% ifnotequal request.path "/" %}<a href="/" class="home">Home</a>{% endifnotequal %}
-		</h1>
+<div class="blackbar">
+	<div class="container_12">
+		<div id="header-bar" class="grid_12">
+			<div id="heading-box" class="alpha grid_8"><h1><a href="/">Track the IMDb Top 250</a></h1></div>
+			<div class="omega grid_4 login-box"><div class="login-button">
+				{% if user %}<a class="login" href="#">{% firstof user_info.disp user.nickname %} (<span class="user-seen-count">{{ user_info.num }}</span>)</a>
+				{% else %}<a class="login" href="/login">Sign in with your Google Account</a>
+				{% endif %}
+			</div></div>
+		</div>
+		<div id="subheader-bar" class="grid_12">
+			<div class="alpha grid_8"><i>This application lets you mark movies that you have seen on the IMDb Top 250.<br>You can see which movies you've missed out, and compare your movie watching with others.</i></div>
+			<div class="omega grid_4" style="text-align:right">
+			{% if user %}
+				<form id="userprefs" action="/" method="post">
+					<input id="disp" name="disp" value="{% firstof user_info.disp user.nickname %}">
+					<input type="submit" value="Change name">
+				</form>
+				or <a id="logout" href="/logout">click here to logout</a>
+			{% else %}
+				<i>If you don't have a Google Account,<br>click the button above to create one.</i>
+			{% endif %}
+			</div>
+		</div>
 	</div>
-	<div class="grid_10">
+</div>
+
+<div class="clear">&nbsp</div>
+<div class="container_12 mainbar">
+	<div class="grid_8">
+	{% if can_change and new_movies %}
+		<h2>New in the IMDb Top 250</h2>
+		<table id="newmovies" class="sortable movies"><thead>
+			<tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
+		</thead><tbody>
+{% for movie in new_movies %}
+<tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
+</td><td>{{ movie.year }}
+</td><td><a class="ic im" href="http://www.imdb.com{{ movie.url }}"></a>
+{% if can_change %}<a class="x" data={{ movie.url }} href="#">{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
+</td><td>{{ movie.rating }}
+</td><td>{{ movie.votes }}
+</td></tr>
+{% endfor %}
+		</tbody></table>
+	{% endif %}
+		<h2>
 		{% if person %}
-			<p><label for="filter">Filter:</label>
 			<select id="filter">
 				<option value="all" 			>All movies</option>
 				{% if other %}
@@ -65,118 +127,157 @@ th { _cursor: hand; cursor: pointer; }
 				<option value="seen"			>Show only seen   movies</option>
 				{% endif %}
 			</select>
-			{% if other %}
-				<span class="person">{% firstof person_info.disp person.nickname %}: <span id="count">{{ person_info.num }}</span>.</span>
-				<span class="other" >{% firstof other_info.disp  other.nickname  %}: <span id="count">{{ other_info.num  }}</span>.</span>
+		{% endif %}
+		{% if person %}<span class="person">{% firstof person_info.disp person.nickname %}: <span class="user-seen-count">{{ person_info.num }}</span> / 250</span>
+			{% if other %}vs <span class="other">{% firstof other_info.disp other_info.user.nickname %}: {{ other_info.num }} / 250</span>
 			{% else %}
-				{% firstof person_info.disp person.nickname %} has seen <span id="count">{{ person_info.num }}</span> / 250 movies.
-				{% if user %}{% ifnotequal user person %}<a href="/compare/{% firstof person_info.disp person_info.user.email %}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
+				{% if user %}{% ifnotequal user person %}
+					<a class="diff" href="/compare/{% firstof person_info.disp person_info.user.email %}">diff</a>
+					{% if not person_info.follower %}<a class="follow" href="/follow/{{ person_info.user.email }}">follow</a>
+					{% else %}<a class="unfollow" href="/unfollow/{{ person_info.user.email }}">unfollow</a>{% endif %}
+				{% endifnotequal %}{% endif %}
 			{% endif %}
-			</p>
+		{% else %}IMDb Top 250
 		{% endif %}
-		{% if other %}<p>
-			<a href="#" class="legend both"   ><span class="num both"	></span> seen by both</a>.
-			<a href="#" class="legend person" ><span class="num person" ></span> only by {% firstof person_info.disp person.nickname %}</a>.
-			<a href="#" class="legend other"  ><span class="num other"	></span> only by {% firstof other_info.disp  other.nickname  %}</a>.
-			<a href="#" class="legend neither"><span class="num neither"></span> by neither</a>.
-		</p>{% endif %}
-		{% if can_change %}
-			<p><i>Click on a movie to mark it as <span class="seen">seen</span>. Click again to toggle.</i></p>
-		{% endif %}
-		{% if can_change and new_movies %}
-			<h3>New in the IMDb Top 250</h3>
-			<table id="newmovies" class="sortable movies"><thead>
-				<tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
-			</thead><tbody>
-{% for movie in new_movies %}
-<tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
-</td><td>{{ movie.year }}
-</td><td><a class="im" href="http://www.imdb.com{{ movie.url }}"></a>
-{% if can_change %}<a class="toggle" data={{ movie.url }} href="#">{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
-</td><td>{{ movie.rating }}
-</td><td>{{ movie.votes }}
-</td></tr>
-{% endfor %}
-			</tbody></table>
-			<h3>IMDb Top 250</b></h3>
-		{% endif %}
+		</h2>
+		{% if can_change %}<div class="instructions">Click on a movie to mark it as <span class="seen">seen</span>. Click again to toggle.</div>{% endif %}
 		<table id="movies" class="sortable movies"><thead>
-			<tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
+		<tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
 		</thead><tbody>
 {% for movie in movies %}
 <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
 </td><td>{{ movie.year }}
-</td><td><a class="im" href="http://www.imdb.com{{ movie.url }}"></a>
-{% if can_change %}<a class="toggle" data={{ movie.url }} href="#">{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
+</td><td><a class="ic im" href="http://www.imdb.com{{ movie.url }}"></a>
+{% if can_change %}<a class="x" data={{ movie.url }} href="#">{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
 </td><td>{{ movie.rating }}
 </td><td>{{ movie.votes }}
 </td></tr>
 {% endfor %}
 		</tbody></table>
-		<p style="line-height:1.25;"><a type="application/rss+xml" rel="alternate" href="http://feeds.s-anand.net/imdbtop250"><img style="float:left;margin-right:5px;" alt="" src="http://www.feedburner.com/fb/images/pub/feed-icon32x32.png"/>Subscribe to the<br>IMDb Top 250 RSS feed</a></p>
 	</div>
-	<div class="grid_6">
-		{% if user %}
-			<p>You are logged in as <span id="disp_name">{% firstof user_info.disp user_info.user.nickname %}</span>. <a href='#' id="show_change_form">Change name</a> | <a href="/logout">Logout</a></p>
-			<form id="change_name" action="/" method="post"><input id="disp" name="disp" value="{% firstof user_info.disp user_info.user.nickname %}"><input type="submit" value="Change"></form>
-		{% else %}
-			<a class="login" href="/login">Log in to track movies you have watched</a>
-			<p><i>This application lets you mark movies that you have seen on the <a href="http://www.imdb.com/chart/top">IMDb Top 250</a>. You can see which movies you've missed out, and compare how many others have seen.</i></p>
+	<div class="grid_4">
+		{% if person_info %}
+		<h2>Share this page</h2>
+		<p><a class="share_twitter" target="_blank" href="http://twitter.com/home?status={% firstof person_info.disp person.nickname %} has seen {{ person_info.num }} of the @IMDb Top 250 movies. http://250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp|urlencode|urlencode }}{% else %}/user/{{ person_info.user.email }}{% endif %}"><img class="icon" src="http://www.google.com/s2/favicons?domain=twitter.com" title="Share on Twitter">Share on Twitter</a>
+		<br><a class="share_facebook" target="_blank" href="http://www.facebook.com/sharer.php?u=http://250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp|urlencode }}{% else %}/user/{{ person_info.user.email }}{% endif %}&t=Track movies you've seen on the IMDb Top 250"><img class="icon" src="http://www.google.com/s2/favicons?domain=facebook.com" title="Share on Facebook">Share on Facebook</a>
+		<br><a class="share_link" target="_blank" href="http://250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp|urlencode }}{% else %}/user/{{ person_info.user.email }}{% endif %}">250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp }}{% else %}/user/{{ person_info.user.email }}{% endif %}</a></p>
 		{% endif %}
-
 		{% if person_recos %}
 		<h2>Recommendations for {% firstof person_info.disp person.nickname %}</h2>
+		Based on people with similar interests.
 		<ol id="person_recos">
 		{% for movie in person_recos %}
 			<li><a target="_blank" href="http://www.imdb.com{{ movie.url }}">{{ movie.title }}</a></li>
 		{% endfor %}
-		</ul>
-		<p>People with similar interests watched these the most.</p>
+		</ol>
+		{% endif %}
+
+		{% if user_followers and can_change %}
+		<h2>{% firstof user_info.disp user.nickname %} is following</h2>
+		<table id="following">
+		{% for x in user_followers %}
+			<tr><td>{{ x.num }}</td><td>
+			{% if x.disp %}<a href="/name/{{ x.disp|urlencode }}">{{ x.disp }}</a>{% else %}<a href="/user/{{ x.user.email }}">{{ x.user.nickname }}</a>{% endif %}
+			{% if user %}{% ifnotequal user x.user %}
+				<a href="/compare/{% firstof x.disp x.user.email %}" class="diff">diff</a>
+				<a class="unfollow" href="/unfollow/{{ x.user.email }}">unfollow</a>
+			{% endifnotequal %}{% endif %}
+			</td></tr>
+		{% endfor %}
+		</table>
 		{% endif %}
 
 		<h2>Top movie watchers</h2>
 		<table id="top_watchers">
-		{% for x in top_watchers %}<tr>
-			<td><div class="box valign_middle" style="width:{% widthratio x.num 250 200 %}px">{{ x.num }}&nbsp;</div></td>
-			<td class="valign_middle">{% if x.disp %}<a href="/name/{{ x.disp|urlencode }}">{{ x.disp }}</a>{% else %}<a href="/user/{{ x.user.email }}">{{ x.user.nickname }}</a>{% endif %}
-				{% if user %}{% ifnotequal user x.user %}<a href="/compare/{% firstof x.disp x.user.email %}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}
+		{% for x in top_watchers %}
+			<tr><td>{{ x.num }}</td><td>{% if x.disp %}<a href="/name/{{ x.disp|urlencode }}">{{ x.disp }}</a>{% else %}<a href="/user/{{ x.user.email }}">{{ x.user.nickname }}</a>{% endif %}
+			{% if user %}{% ifnotequal user x.user %}
+				<a href="/compare/{% firstof x.disp x.user.email %}" class="diff">diff</a>
+				{% if not x.follower %}<a class="follow" href="/follow/{{ x.user.email }}">follow</a>{% endif %}
+			{% endifnotequal %}{% endif %}
 			</td></tr>
 		{% endfor %}
 		</table>
 
-		<h2>Recently activity</h2>
-		<ul id="recent_users">
+		<h2>Recent movie watchers</h2>
+		<table id="recent_watchers">
 		{% for x in recent_users %}
-			<li>{% if x.disp %}<a href="/name/{{ x.disp|urlencode }}">{{ x.disp }}</a>{% else %}<a href="/user/{{ x.user.email }}">{{ x.user.nickname }}</a>{% endif %} ({{ x.num }} / 250) <span class="timesince">{{ now|timesince:x.time }} ago </span>{% if user %}{% ifnotequal user x.user %}<a href="/compare/{% firstof x.disp x.user.email %}" title="Compare with yourself" class="diff">diff</a>{% endifnotequal %}{% endif %}</li>
+			<tr><td>{{ x.num }}</td><td>{% if x.disp %}<a href="/name/{{ x.disp|urlencode }}">{{ x.disp }}</a>{% else %}<a href="/user/{{ x.user.email }}">{{ x.user.nickname }}</a>{% endif %}
+			{% if user %}{% ifnotequal user x.user %}
+				<a href="/compare/{% firstof x.disp x.user.email %}" class="diff">diff</a>
+				{% if not x.follower %}<a class="follow" href="/follow/{{ x.user.email }}">follow</a>{% endif %}
+			{% endifnotequal %}{% endif %}
+			<span class="stats">{{ now|timesince:x.time }} ago </span>
 		{% endfor %}
-		</ul>
-
-		{% if can_change %}
-		<h2>Widgets</h2><div>
-			<div style="float:right;margin:5px 0;border:1px solid #ccc;"><img src="/movie-count-widget.png"></div>
-			Add the <span class="widget-name">Movie Counter</span> widget to your website. It shows visitors the number of movies you've watched. Copy and paste the code below to your website.
-			<textarea class="source" readonly>&lt;script src="http://250.s-anand.net/count.js"&gt;&lt;/script&gt;&lt;script src="http://250.s-anand.net/data/{{ person.email }}/count?callback=twofifty_count"&gt;&lt;/script&gt;</textarea>
-			<br>
-			<div style="float:right;margin:5px 0 5px 5px;border:1px solid #ccc;"><img src="/movie-seen-widget.png"></div>
-			The <span class="widget-name">Recent Movies</span> widget shows the last 5 movies you watched on IMDb. Copy and paste the code below to your website.
-			<textarea class="source" readonly>&lt;script src="http://250.s-anand.net/seen.js"&gt;&lt;/script&gt;&lt;script src="http://250.s-anand.net/data/{{ person.email }}/seen?callback=twofifty_seen"&gt;&lt;/script&gt;</textarea>
-		</div>
-		{% endif %}
-
-		<h2>API</h2><div>
-			<p><a href="/data/root.node@gmail.com/count"><code>/data/<i>user</i>/count</code></a> returns movies a user has watched.</p>
-			<p><a href="/data/root.node@gmail.com/seen"><code>/data/<i>user</i>/seen</code></a> returns all 250 movies, indicating if the user has seen the movie or not.</p>
-			<p><code>/data/all/users</code> returns all users and number of movies seen. <i>Available only to the administrator.</i></p>
-			<hr>
-			<p>These return JSON and accept a <code>callback</code> parameter. e.g. <a href="/data/root.node@gmail.com/count?callback=fn"><code>/data/<i>user</i>/count?callback=fn</code></a>.</p>
-			<hr>
-			<p>This page is hosted by <a href="http://appengine.google.com/">Google AppEngine</a> and the source code is available at <a href="http://two-fifty.googlecode.com/">two-fifty.googlecode.com</a>. Authored by <a href="http://www.s-anand.net/">Anand</a>.</p>
-		</div>
+		</table>
 	</div>
 </div>
+<div class="clear">&nbsp;</div>
+<div class="blackbar bottombar">
+	<div class="container_12">
+		<div class="grid_6">
+			<h2>API</h2>
+			<p><a href="/data/root.node@gmail.com/count"><code>/data/<i>user</i>/count</code></a> returns the user's watched count
+			<br><a href="/data/root.node@gmail.com/seen"><code>/data/<i>user</i>/seen</code></a> returns the user's seen / unseen movies
+			<br><code>/data/all/users</code> is an <i>Admin</i> API that shows all users</p>
+			<p>Results in returned in JSON, with <code>callback</code> support.
+			<br>e.g. <a href="/data/root.node@gmail.com/count?callback=fn"><code>/data/<i>user</i>/count?callback=fn</code></a>.</p>
+			<p><a type="application/rss+xml" rel="alternate" href="http://feeds.s-anand.net/imdbtop250"><img class="icon" src="http://www.feedburner.com/fb/images/pub/feed-icon16x16.png">Subscribe to the IMDb Top 250</a></p>
+			<p>This page is hosted by <a href="http://appengine.google.com/">Google AppEngine</a><br>The source code is at <a href="http://two-fifty.googlecode.com/">two-fifty.googlecode.com</a></p>
+			<p>Authored by <a href="http://www.s-anand.net/">Anand</a></p>
+		</div>
+		<div class="grid_6">
+		{% if user %}
+			<h2>Widgets</h2>
+			<textarea class="source" readonly>&lt;script src="http://250.s-anand.net/count.js"&gt;&lt;/script&gt;&lt;script src="http://250.s-anand.net/data/{{ person.email }}/count?callback=twofifty_count"&gt;&lt;/script&gt;</textarea>
+			<p>Copy and paste the code above to add the <span class="widget-name">Movie Counter</span> widget to your website. It shows visitors the number of movies you've watched.</p>
+			<textarea class="source" readonly>&lt;script src="http://250.s-anand.net/seen.js"&gt;&lt;/script&gt;&lt;script src="http://250.s-anand.net/data/{{ person.email }}/seen?callback=twofifty_seen"&gt;&lt;/script&gt;</textarea>
+			<p>Copy and paste the code above to add the <span class="widget-name">Recent Movies</span> widget to your website. It shows the last 5 movies you watched on IMDb.</p>
+		{% else %}
+			<div class="login-box"><div class="login-button">
+			<a class="login" href="/login">Sign in to add widgets to your site</a>
+			</div></div>
+		</div>
+		{% endif %}
+	</div>
+</div>
+
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <script>
-$('.login').click(function() { if (window.pageTracker) { pageTracker._trackPageview('/login'); } });
+$('.movies tbody tr:odd').css('background-color', '#ebf8de');
+$('.movies a.im').attr('target', '_blank').attr('title', 'Open IMDb page in new window');
+$('a.diff').attr('title', 'Compare with yourself');
+$('.source').click(function() { $(this).select(); });
+
+var actions = [
+{	url:	'http://www.mininova.org/search/%s/4/seeds',
+	title:	'Search for torrent',
+	icon:	'http://www.mininova.org/favicon.ico',
+	cls:	'mininova'
+}
+,{	url:	'http://www.netflix.com/Search?v1=%s',
+	title:	'Search and rent on Netflix',
+	icon:	'http://www.netflix.com/favicon.ico',
+	cls:	'netflix'
+}
+,{	url:	'http://www.lovefilm.com/search/overview.html?search_keywords=%s',
+	title:	'Search and rent on LoveFilm',
+	icon:	'http://www.lovefilm.com/favicon.ico',
+	cls:	'lovefilm'
+}
+];
+
+$('.movies tr').find('td:eq(2)').each(function() {
+	for (var i=0, a; a=actions[i]; i++) {
+		$(this).prepend('<a target="_blank" title="$title" class="ic $cls" href="$url"><img src="$icon"></a>'
+			.replace('$url',	a.url.replace('%s', $(this).text()))
+			.replace('$title',	a.title)
+			.replace('$icon',	a.icon)
+			.replace('$cls',	a.cls)
+		);
+	}
+});
+
 $('#filter').change(function(e) {
 	switch($(this).find('option:selected').attr('value')) {
 		case 'all': 				$('.movies tr').show(); break;
@@ -190,57 +291,57 @@ $('#filter').change(function(e) {
 		case 'person_not_other':	$('.movies tr.person').show(); $('.movies tr.both,tr.other,tr.neither').hide(); break;
 		case 'other_not_person':	$('.movies tr.other').show(); $('.movies tr.both,tr.person,tr.neither').hide(); break;
 	}
-	if (window.pageTracker) { pageTracker._trackPageview('/clicked/filter'); }
 });
-$('.num').each(function() { var e = $(this); e.html($('tr.' + e.attr('class').replace(/\s*num\s*/, '')).length + ' '); });
-$('.legend').click(function(e) {
-	$('.movies tbody tr').hide();
-	$('tr.' + $(this).attr('class').replace(/\s*legend\s*/, '')).show();
-	e.preventDefault();
-	if (window.pageTracker) { pageTracker._trackPageview('/clicked/legend'); }
-});
-$('.movies tr').find('td:eq(2)').each(function() { $(this).prepend('<a class="mi" href="http://www.mininova.org/search/' + $(this).text() + '/4/seeds"></a>'); });
-$('.movies a.mi').attr('title', 'Search for torrent').attr('target', '_blank');
-$('.movies a.im').attr('title', 'Open IMDb page in new window').attr('target', '_blank');
+
+{% if user %}$('.login').click(function(e) { e.preventDefault(); $('#subheader-bar').slideToggle(); });{% endif %}
+
 {% if can_change %}
-$('.movies a.toggle').attr('title', 'Click to mark as seen or unseen').click(function(e) {
+$('.movies a.x').attr('title', 'Click to mark as seen or unseen').click(function(e) {
 	e.preventDefault();
-	var tgt = $(e.target), url = tgt.attr('data');
+	var url = $(e.target).attr('data'),
+		tgt = $('.movies a.x[data=' + url + ']');
 	tgt.parent().append('<img src="/loading-small.gif" alt="working..." class="working">');
 	$.post('/', {movie: url}, function(response) {
 		if (response == url) {
-			var tr = tgt.parents('tr').eq(0);
-			if		(tr.hasClass('seen'  )) { tr.addClass('unseen').removeClass('seen'	); }
-			else if (tr.hasClass('unseen')) { tr.addClass('seen'  ).removeClass('unseen'); }
+			var tr = tgt.parents('tr'),
+				sc = $('.user-seen-count'),
+				n  = +sc.eq(0).text();
+			if		(tr.hasClass('seen'  )) { tr.addClass('unseen').removeClass('seen'	); n--; }
+			else if (tr.hasClass('unseen')) { tr.addClass('seen'  ).removeClass('unseen'); n++; }
+			sc.text(n);
 			tr.find('.working').remove();
 			$('#count').text($('tr.seen').length);
 		}
 	});
-	if (window.pageTracker) { pageTracker._trackPageview('/clicked/movie'); }
 });
 {% endif %}
-{% if user %}$('#show_change_form').click(function() { $('#change_name').toggle(); });{% endif %}
-$(".movies tbody tr:odd").css("background-color", "#f0f0f0");
-$('.source').click(function() { $(this).select(); });
+
 </script>
 <script src="http://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
-<!-- script src="http://asset.userfly.com/users/12427/userfly.js" type="text/javascript"></script -->
-<style type='text/css'>@import url('http://s3.amazonaws.com/getsatisfaction.com/feedback/feedback.css');</style>
-<script src='http://s3.amazonaws.com/getsatisfaction.com/feedback/feedback.js' type='text/javascript'></script>
-<script>
-var tab_options = {}
-tab_options.placement = "left";  // left, right, bottom, hidden
-tab_options.color = "#222"; // hex (#FF0000) or color (red)
-GSFN.feedback('http://getsatisfaction.com/twofifty/feedback/topics/new?display=overlay&style=idea', tab_options);
-</script>
-<script>
+
+{% if not users.is_current_user_admin %}<script>
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 <script>try {
 	var pageTracker = _gat._getTracker("UA-7269195-1");
-	pageTracker._setVar("template-960-full");
+	pageTracker._setVar("new-green");
 	pageTracker._trackPageview();
-} catch(err) {}</script>
+	{% if not user %}
+	$('.login').click(function()				{ pageTracker._trackPageview('/login'); 						});{% endif %}
+	$('a.x').click(function()					{ pageTracker._trackPageview('/clicked/movie'); 				});
+	$('a.follow').click(function()				{ pageTracker._trackPageview('/clicked/follow');				});
+	$('a.unfollow').click(function()			{ pageTracker._trackPageview('/clicked/unfollow');				});
+	$('#filter').change(function()				{ pageTracker._trackPageview('/clicked/filter');				});
+	$('a[class^=share],a.ic').click(function()	{ pageTracker._trackPageview('/clicked/'+$(this).attr('class'));});
+} catch(err) {}
+</script>{% endif %}
+
 <!-- script type="text/javascript">try { setTimeout(function() { $.getScript('/build-reco.js'); }, 5000); } catch(err) {}</script -->
+<!-- script src="http://asset.userfly.com/users/12427/userfly.js" type="text/javascript"></script -->
+<style type='text/css'>@import url('http://s3.amazonaws.com/getsatisfaction.com/feedback/feedback.css');</style>
+<script src='http://s3.amazonaws.com/getsatisfaction.com/feedback/feedback.js' type='text/javascript'></script>
+<script>
+GSFN.feedback('http://getsatisfaction.com/twofifty/feedback/topics/new?display=overlay&style=idea', {'placement': 'left', 'color': '#222'});
+</script>
 </body></html>

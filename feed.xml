@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+<channel>
+<title>Activity on 250.s-anand.net</title>
+<link>http://250.s-anand.net/</link>
+<description>What movies have people been watching on the IMDb Top 250</description>
+<pubDate>{{ updated|date:"r" }}</pubDate>
+<item>
+	<title>250.s-anand.net: {{ updated|date:"D jS N Y" }}</title>
+	<link>http://250.s-anand.net/</link>
+	<guid>http://250.s-anand.net/{{ updated|date:"Y-m-d" }}</guid>
+	<description><![CDATA[
+	<p><b>{{ people }} people saw {{ count }} movies</b></p>
+{% for item in activity %}
+	<p><a href="http://250.s-anand.net/user/{{ item.0.email }}">{{ item.0.nickname }}</a> saw
+	{% for movie in item.1 %}<a href="http://www.imdb.com{{ movie.url }}">{{ movie.title }}</a>{% if not forloop.last %}, {% endif%}{% endfor %}
+	</p>
+{% endfor %}
+	]]></description>
+	<author>{{ entry.user.email }}</author>
+	<pubDate>{{ entry.time|date:"r" }}</pubDate>
+</item>
+</channel>
+</rss>

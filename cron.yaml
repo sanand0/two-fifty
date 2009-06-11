@@ -1,8 +1,8 @@
 cron:
 - description: daily refresh of IMDb Top 250
   url: /refresh
-  schedule: every 24 hours
+  schedule: every day 00:00
 
 - description: daily refresh of user activity
   url: /feed/refresh
-  schedule: every 24 hours
+  schedule: every day 00:00

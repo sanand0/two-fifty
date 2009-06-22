@@ -1,1 +1,1 @@
-{% if callback %}{{ callback }}({% endif %}{user:"{{ person.email }}",name:"{{ person_disp|addslashes }}",count:{{ person_info.num }}}{% if callback %}){% endif %}
+{% if callback %}{{ callback }}({% endif %}{"user":"{{ person.email }}","name":"{{ person_disp|addslashes }}","count":{{ person_info.num }}}{% if callback %}){% endif %}

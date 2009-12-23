@@ -60,7 +60,9 @@ class MoviePage(webapp.RequestHandler):
             else: self.response.out.write('Use only letters and numbers')       # Notify error
 
     def show_page(self, person = None):
-        if last_download_date() < yesterday: download_250()                     # If we downloaded over a day ago,
+        if last_download_date() < yesterday:                                    # If we downloaded over a day ago,
+            try: download_250()
+            except: pass
         movies          = read_250_from_db()                                    # Read from the datastore
         compare_days    = 10                                                    # Number of days prior to compare with
         new_movies      = extract_new(movies, read_250_from_db(compare_days))   # Extract new movies since compare_days ago
@@ -125,7 +127,9 @@ class ComparePage(webapp.RequestHandler):
         else: person_info, other_info = user_info, person_info                  # The other is the current user by default
         if person_info and other_info:
             person, other = person_info.user, other_info.user
-            if last_download_date() < yesterday: download_250()                 # Download IMDb Top 250 if it's over a day old
+            if last_download_date() < yesterday:                                # Download IMDb Top 250 if it's over a day old
+                try: download_250()
+                except: pass
             movies = read_250_from_db()                                         # Read from the datastore
             count_person = mark_seen_movies(movies, person, 'person')           # Mark the number of movies person has seen
             count_other  = mark_seen_movies(movies, other , 'other' )           # Mark the number of movies other has seen
@@ -158,26 +162,23 @@ def mark_rel(users, rel):
 
 def download_250():
     '''Downloads the top 250 movies on IMDb and saves it in the data store'''
-    try:
-        movies, result = [], urlfetch.fetch('http://www.imdb.com/chart/top')        # Get the IMDB Top 250
-        logging.info('Refreshing IMDb Top 250. Status = ' + str(result.status_code))
-        if result.status_code == 200:
-            re_scripts = re.compile(r'<script.*?</script', re.I + re.S)             # Remove <script></script> tags: they interfere with BeautifulSoup
-            soup = BeautifulSoup(re.sub(re_scripts, '', result.content))
-            for movie in soup.findAll('a', href=re.compile(r'^/title/.*')):         # Assumption: only movie URLs (href="/title/...") are the Top 250
-                cell = movie.findParent('tr').findAll('td')
-                movies.append({
-                    'url': (x[1] for x in movie.attrs if x[0] == 'href').next(),    # URL will be used as the unique identifier
-                    'title': movie.string,                                          # Only movie name, not the year. Kept HTML encoded.
-                    'year': re.search(r'\((\d\d\d\d).*?\)', str(cell[2].font)).group(1), # Structure: <font><a..>Movie name</a> (2004/I)</font>
-                    'rank': cell[0].font.b.string.replace('.', ''),                 # Structure: <font><b>250.</b></font>
-                    'rating': cell[1].font.string,                                  # Structure: <font>9.0</font>
-                    'votes': cell[3].font.string,                                   # Structure: <font>100,000</font>
-                })
-            def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
-            Top250(time=now, data='\n'.join(encode(movie) for movie in movies)).put()
-    except:
-        pass
+    movies, result = [], urlfetch.fetch('http://www.imdb.com/chart/top')        # Get the IMDB Top 250
+    logging.info('Refreshing IMDb Top 250. Status = ' + str(result.status_code))
+    if result.status_code == 200:
+        re_scripts = re.compile(r'^.*<div id="main">', re.I + re.S)            # Remove everything up to the main class: they interfere with BeautifulSoup
+        soup = BeautifulSoup(re.sub(re_scripts, '', result.content))
+        for movie in soup.findAll('a', href=re.compile(r'^/title/.*')):         # Assumption: only movie URLs (href="/title/...") are the Top 250
+            cell = movie.findParent('tr').findAll('td')
+            movies.append({
+                'url': (x[1] for x in movie.attrs if x[0] == 'href').next(),    # URL will be used as the unique identifier
+                'title': movie.string,                                          # Only movie name, not the year. Kept HTML encoded.
+                'year': re.search(r'\((\d\d\d\d).*?\)', str(cell[2].font)).group(1), # Structure: <font><a..>Movie name</a> (2004/I)</font>
+                'rank': cell[0].font.b.string.replace('.', ''),                 # Structure: <font><b>250.</b></font>
+                'rating': cell[1].font.string,                                  # Structure: <font>9.0</font>
+                'votes': cell[3].font.string,                                   # Structure: <font>100,000</font>
+            })
+        def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
+        Top250(time=now, data='\n'.join(encode(movie) for movie in movies)).put()
 
 def read_250_from_db(n=None):
     def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))

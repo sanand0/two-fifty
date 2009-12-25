@@ -165,8 +165,7 @@ def download_250():
     movies, result = [], urlfetch.fetch('http://www.imdb.com/chart/top')        # Get the IMDB Top 250
     logging.info('Refreshing IMDb Top 250. Status = ' + str(result.status_code))
     if result.status_code == 200:
-        re_scripts = re.compile(r'^.*<div id="main">', re.I + re.S)            # Remove everything up to the main class: they interfere with BeautifulSoup
-        soup = BeautifulSoup(re.sub(re_scripts, '', result.content))
+        soup = BeautifulSoup(result.content)
         for movie in soup.findAll('a', href=re.compile(r'^/title/.*')):         # Assumption: only movie URLs (href="/title/...") are the Top 250
             cell = movie.findParent('tr').findAll('td')
             movies.append({

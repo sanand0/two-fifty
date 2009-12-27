@@ -40,9 +40,10 @@ input, textarea { background-color: #9bbb59; }
 .movies { width: 100%; }
 .movies td, .movies th { height: 22px; vertical-align: middle; }
 .movies th { text-align: left; padding: 0 3px; font-weight: normal; }
-.movies th, .box { background-color: #9bbb59; }
-.box { float:right; overflow:hidden; margin-bottom: 0.5em; padding-right: 5px; width: 250px; }
-.box a { display:block; text-align: right; color: #000; text-decoration: none; }
+.movies th { background-color: #bbe06a; border: 1px solid #9bbb59; border-left: 2px outset #bbe06a; cursor: pointer; font-weight: bold;
+    background-image: -moz-linear-gradient    (left top, left bottom, from(#bbe06a), to(#9bbb59));
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#bbe06a), to(#9bbb59));
+}
 
 .instructions { color: #4f6228; font-style: italic; }
 #filter { float:right; border: 1px solid #4f6228; border-width: 1px 0 0 1px; }

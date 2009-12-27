@@ -59,8 +59,12 @@ handlers:
   script: build-reco.py
 
 - url: /refresh
-  script: 250.py
+  script: twofifty.py
   login: admin
 
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+  
 - url: /.*
-  script: 250.py
+  script: twofifty.py

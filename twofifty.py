@@ -19,14 +19,14 @@ class Seen(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # at this time,
     url  = db.StringProperty     (required=True)                        # saw this movie
 
-class Count(db.Model):
+class Count(db.Model):                                                  # (This is really the User master)
     user = db.UserProperty       (required=True)                        # Primary key: user
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
     num  = db.IntegerProperty    (required=True)                        # Number of movies seen, when last counted
     disp = db.StringProperty     ()                                     # Display name
     rel  = db.TextProperty       ()                                     # TSV of relation => user
 
-class Activity(db.Model):
+class Activity(db.Model):                                               # Daily feed of user activity.
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
     data = db.TextProperty       ()                                     # TSV of relation => user
 

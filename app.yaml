@@ -27,6 +27,10 @@ handlers:
   static_files: build-reco.js
   upload: build-reco.js
 
+- url: /favicons.png
+  static_files: favicons.png
+  upload: favicons.png
+
 - url: /movie-count-widget.png
   static_files: movie-count-widget.png
   upload: movie-count-widget.png

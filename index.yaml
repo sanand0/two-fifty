@@ -10,19 +10,16 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Unused in query history -- copied from input.
 - kind: Count
   properties:
   - name: num
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Count
   properties:
   - name: time
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Top250
   properties:
   - name: time

@@ -31,6 +31,14 @@ handlers:
   static_files: favicons.png
   upload: favicons.png
 
+- url: /button-light-green.png
+  static_files: button-light-green.png
+  upload: button-light-green.png
+
+- url: /button-light-green.gif
+  static_files: button-light-green.gif
+  upload: button-light-green.gif
+
 - url: /movie-count-widget.png
   static_files: movie-count-widget.png
   upload: movie-count-widget.png

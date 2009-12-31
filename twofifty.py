@@ -5,10 +5,10 @@ from google.appengine.api                 import users, urlfetch, memcache
 from google.appengine.ext.webapp          import template
 from google.appengine.api.urlfetch_errors import *
 
-user            = users.get_current_user()
-now             = datetime.datetime.now()
-yesterday       = now - datetime.timedelta(1)
-page            = 'index.html'
+user        = users.get_current_user()
+now         = datetime.datetime.now()
+yesterday   = now - datetime.timedelta(1)
+page        = 'index.html'
 
 class Top250(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,

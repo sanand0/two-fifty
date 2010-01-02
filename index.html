@@ -162,8 +162,7 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 {% for movie in movies %}
 <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
 </td><td>{{ movie.year }}
-</td><td><a class="ic im" href="http://www.imdb.com{{ movie.url }}"></a>
-{% if can_change %}<a>{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
+</td><td><a class="ic im" href="http://www.imdb.com{{ movie.url }}"></a><a>{{ movie.title }}</a>
 </td><td>{{ movie.rating }}
 </td><td>{{ movie.votes }}
 </td></tr>
@@ -265,12 +264,17 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 <script>
 try { document.execCommand("BackgroundImageCache", false, fix); } catch(err) { }
 
+{% if can_change %}
 $('.movie a:not([href])')
 	.attr('href', '#')
 	.attr('class', 'x')
 	.each(function() {
 		$(this).attr('data', $(this).prev().attr('href').replace('http://www.imdb.com', ''));
 	});
+{% endif %}
+{% if not user and not person %}
+$('.movie a:not([href])').attr('href', '/login');
+{% endif %}
 $('.movies tbody tr:odd').css('background-color', '#ebf8de');
 $('.movies a.im').attr('target', '_blank').attr('title', 'Open IMDb page in new window');
 $('a.diff').attr('title', 'Compare with yourself');

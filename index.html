@@ -392,6 +392,7 @@ resolve.forEach(object,block,context);}};
 <script>
 var pageTracker = _gat._getTracker("UA-7269195-1");
 pageTracker._trackPageview();
+{% if user %}pageTracker._setCustomVar(1,"HasLoggedIn","Yes",1);{% endif %}
 {% if not user %}
 $('a[href*=login]'		).click(function()	{ pageTracker._trackPageview('/login'); 						});{% endif %}
 $('a.x' 				).click(function()	{ pageTracker._trackPageview('/clicked/movie'); 				});

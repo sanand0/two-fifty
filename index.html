@@ -393,7 +393,7 @@ resolve.forEach(object,block,context);}};
 var pageTracker = _gat._getTracker("UA-7269195-1");
 pageTracker._trackPageview();
 {% if not user %}
-$('.login'				).click(function()	{ pageTracker._trackPageview('/login'); 						});{% endif %}
+$('a[href*=login]'		).click(function()	{ pageTracker._trackPageview('/login'); 						});{% endif %}
 $('a.x' 				).click(function()	{ pageTracker._trackPageview('/clicked/movie'); 				});
 $('a.follow'			).click(function()	{ pageTracker._trackPageview('/clicked/follow');				});
 $('a.unfollow'			).click(function()	{ pageTracker._trackPageview('/clicked/unfollow');				});

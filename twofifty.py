@@ -303,6 +303,13 @@ class FeedPage(webapp.RequestHandler):
         self.response.headers["Content-Type"] = "text/xml"
         self.response.out.write(Activity.all().order('-time').get().data)
 
+class Feed250Page(webapp.RequestHandler):
+    def get(self):
+        today = now.replace(hour=0, minute=0, second=0)
+        movies = read_250_from_db()
+        self.response.headers["Content-Type"] = "text/xml"
+        self.response.out.write(template.render('feed250.xml', locals()))
+
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),
         ('/user/(.+)',              MoviePage),
@@ -315,6 +322,7 @@ application = webapp.WSGIApplication([
         ('/refresh',                RefreshPage),
         ('/feed/refresh',           FeedRefreshPage),
         ('/feed',                   FeedPage),
+        ('/feed250',                Feed250Page),
     ],
     debug=True)
 wsgiref.handlers.CGIHandler().run(application)

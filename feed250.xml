@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+<channel>
+<title>IMDb Top 250</title>
+<link>http://www.imdb.com/chart/top</link>
+<description>Internet Movie Database Top 250 movies</description>
+<pubDate>{{ today|date:"r" }}</pubDate>
+{% for movie in movies %}
+<item>
+	<title>{{ movie.title }}</title>
+	<link>http://www.imdb.com{{ movie.url }}</link>
+	<guid>http://www.imdb.com{{ movie.url }}</guid>
+	<content:encoded><![CDATA[<table>
+<tr><td>Rank</td></td><td>{{ movie.rank }}</td></tr>
+<tr><td>Title</td></td><td>{{ movie.title }}</td></tr>
+<tr><td>Year</td></td><td>{{ movie.year }}</td></tr>
+<tr><td>Rating</td></td><td>{{ movie.rating }}</td></tr>
+<tr><td>Votes</td></td><td>{{ movie.votes }}</td></tr>
+</table>]]></content:encoded>
+	<pubDate>{{ today|date:"r" }}</pubDate>
+</item>
+{% endfor %}
+</channel>
+</rss>

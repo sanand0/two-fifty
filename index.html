@@ -109,7 +109,7 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 <div class="clear">&nbsp;</div>
 <div class="container_12 mainbar">
 	<div class="grid_8">
-	{% if can_change and new_movies %}
+	{% if new_movies %}
 		<h2>New in the IMDb Top 250</h2>
 		<table id="newmovies" class="sortable movies"><thead>
 			<tr><th>Rank</th><th>Year</th><th>Movie</th><th>Rating</th><th>Votes</th></tr>
@@ -117,8 +117,7 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 {% for movie in new_movies %}
 <tr class="{% if movie.person and movie.other %}both {% else %}{% if movie.person %}person {% else %}{% if movie.other %}other {% else %}{% if other %}neither {% endif %}{% endif %}{% endif %}{% endif %}{% if movie.seen %}seen {% else %}unseen {% endif %}movie"><td>{{ movie.rank }}
 </td><td>{{ movie.year }}
-</td><td><a class="ic im" href="http://www.imdb.com{{ movie.url }}"></a>
-{% if can_change %}<a>{{ movie.title }}</a>{% else %}{{ movie.title }}{% endif %}
+</td><td><a class="ic im" href="http://www.imdb.com{{ movie.url }}"></a><a>{{ movie.title }}</a>
 </td><td>{{ movie.rating }}
 </td><td>{{ movie.votes }}
 </td></tr>

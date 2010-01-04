@@ -74,6 +74,10 @@ handlers:
   script: twofifty.py
   login: admin
 
+- url: /mail.*
+  script: campaign.py
+  login: admin
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin

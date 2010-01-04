@@ -12,6 +12,16 @@ indexes:
 
 - kind: Count
   properties:
+  - name: email
+  - name: login
+
+- kind: Count
+  properties:
+  - name: email
+  - name: time
+
+- kind: Count
+  properties:
   - name: num
     direction: desc
 
@@ -19,6 +29,11 @@ indexes:
   properties:
   - name: time
     direction: desc
+
+- kind: Count
+  properties:
+  - name: user
+  - name: email
 
 - kind: Top250
   properties:

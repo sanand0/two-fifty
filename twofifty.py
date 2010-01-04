@@ -10,6 +10,10 @@ now         = datetime.datetime.now()
 yesterday   = now - datetime.timedelta(1)
 page        = 'index.html'
 
+def memcache_setdefault(key, value, time):
+    memcache.set(key, value, time)
+    return value
+
 class Top250(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # At this time,
     data = db.TextProperty       (required=True)                        # this was the contents of the IMDb Top 250
@@ -20,11 +24,13 @@ class Seen(db.Model):
     url  = db.StringProperty     (required=True)                        # saw this movie
 
 class Count(db.Model):                                                  # (This is really the User master)
-    user = db.UserProperty       (required=True)                        # Primary key: user
-    time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
-    num  = db.IntegerProperty    (required=True)                        # Number of movies seen, when last counted
-    disp = db.StringProperty     ()                                     # Display name
-    rel  = db.TextProperty       ()                                     # TSV of relation => user
+    user  = db.UserProperty      (required=True)                        # Primary key: user
+    time  = db.DateTimeProperty  (required=True, auto_now_add=True)     # Last date a movie was marked by user
+    num   = db.IntegerProperty   (required=True)                        # Number of movies seen, when last counted
+    login = db.DateTimeProperty  ()                                     # Last logged in date
+    email = db.DateTimeProperty  ()                                     # Last emailed in date
+    disp  = db.StringProperty    ()                                     # Display name
+    rel   = db.TextProperty      ()                                     # TSV of relation => user
 
 class Activity(db.Model):                                               # Daily feed of user activity.
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
@@ -60,11 +66,8 @@ class MoviePage(webapp.RequestHandler):
             else: self.response.out.write('Use only letters and numbers')       # Notify error
 
     def show_page(self, person = None):
-        if last_download_date() < yesterday:                                    # If we downloaded over a day ago,
-            try: download_250()
-            except: pass
         movies          = read_250_from_db()                                    # Read from the datastore
-        compare_days    = 10                                                    # Number of days prior to compare with
+        compare_days    = 10                                                    # Number of days prior to compare with. TODO: Change this to days since last login
         new_movies      = extract_new(movies, read_250_from_db(compare_days))   # Extract new movies since compare_days ago
         user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
         user_rel, user_followers = None, None
@@ -77,6 +80,9 @@ class MoviePage(webapp.RequestHandler):
             person_info  = mark_rel([person_info], user_rel)[0]                 # Mark the rel tags
             person_recos = get_recos(movies)[0:10]
         else: person_info = None
+        if self.request.get('login') and user_info:                             # If the user's just logged in, he'll be redirected to /?login=1
+            user_info.login = now                                               # So set the last logged-in date for the user
+            user_info.put()
         can_change      = user==person and user
         top_watchers    = mark_rel(get_top_watchers(), user_rel)
         recent_users    = mark_rel(get_recent_users(), user_rel)
@@ -127,9 +133,6 @@ class ComparePage(webapp.RequestHandler):
         else: person_info, other_info = user_info, person_info                  # The other is the current user by default
         if person_info and other_info:
             person, other = person_info.user, other_info.user
-            if last_download_date() < yesterday:                                # Download IMDb Top 250 if it's over a day old
-                try: download_250()
-                except: pass
             movies = read_250_from_db()                                         # Read from the datastore
             count_person = mark_seen_movies(movies, person, 'person')           # Mark the number of movies person has seen
             count_other  = mark_seen_movies(movies, other , 'other' )           # Mark the number of movies other has seen
@@ -137,19 +140,8 @@ class ComparePage(webapp.RequestHandler):
             recent_users = get_recent_users()
             self.response.out.write(template.render(page, dict(locals().items() + globals().items())))
 
-def get_top_watchers():
-    data = memcache.get('top_watchers')
-    if not data:
-        data = Count.all().order('-num').fetch(20)
-        memcache.add('top_watchers', data, 3600)
-    return data
-
-def get_recent_users():
-    data = memcache.get('recent_users')
-    if not data:
-        data = Count.all().order('-time').fetch(10)
-        memcache.add('recent_users', data, 3600)
-    return data
+get_top_watchers = lambda: memcache.get('top_watchers') or memcache_setdefault('top_watchers', Count.all().order('-num' ).fetch(20), 3600)
+get_recent_users = lambda: memcache.get('recent_users') or memcache_setdefault('recent_users', Count.all().order('-time').fetch(10), 3600)
 
 def mark_rel(users, rel):
     if not rel: return users
@@ -179,15 +171,15 @@ def download_250():
         def encode(dict): return '\t'.join(key + ':' + dict[key] for key in dict)
         Top250(time=now, data='\n'.join(encode(movie) for movie in movies)).put()
 
-def read_250_from_db(n=None):
-    def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
-    q = Top250.all().order('-time')                                                 # Want the most recent
-    top = n and q.filter('time < ', now - datetime.timedelta(n)).get() or q.get()   # before n 'days'
-    return top and list(decode(line) for line in top.data.split('\n')) or ()        # Decode it and send it back
-
-def last_download_date():
-    top = Top250.all().order('-time').get()
-    return top and top.time or datetime.datetime(1900, 1, 1)
+def read_250_from_db(n=0):
+    key = 'read_250_from_db' + str(n)
+    data = memcache.get(key)
+    if not data:
+        def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
+        q = Top250.all().order('-time')                                                 # Want the most recent
+        top = n and q.filter('time < ', now - datetime.timedelta(n)).get() or q.get()   # before n 'days'
+        data = top and list(decode(line) for line in top.data.split('\n')) or ()        # Decode it and send it back
+    return memcache_setdefault(key, data, 12 * 3600)
 
 def mark_seen_movies(movies, user, param='seen'):                                   # Loops through movies, setting param to last seen date (if seen)
     count, seen = 0, {}
@@ -231,18 +223,11 @@ def user_prop(person, set_count = None, change_count = None, set_disp = None):
         # Only the user can change the display name
         if user==person and set_disp and person_info.disp != set_disp: person_info.disp, changed = set_disp, 1
 
-        # Update the time only if something's changed
-        if changed:
+        if changed:                                     # Update the time only if something's changed
             if user == person: person_info.time = now
             person_info.put()
 
     return person_info
-
-class LoginPage(webapp.RequestHandler):
-    def get(self): self.redirect(users.create_login_url('/'))
-
-class LogoutPage(webapp.RequestHandler):
-    def get(self): self.redirect(users.create_logout_url('/'))
 
 class DataPage(webapp.RequestHandler):
     def get(self, person, data):
@@ -305,10 +290,14 @@ class FeedPage(webapp.RequestHandler):
 
 class Feed250Page(webapp.RequestHandler):
     def get(self):
-        today = now.replace(hour=0, minute=0, second=0)
-        movies = read_250_from_db()
         self.response.headers["Content-Type"] = "text/xml"
-        self.response.out.write(template.render('feed250.xml', locals()))
+        self.response.out.write(template.render('feed250.xml', { 'movies': read_250_from_db(), 'today': now.replace(hour=0, minute=0, second=0) }))
+
+class LoginPage(webapp.RequestHandler):
+    def get(self): self.redirect(users.create_login_url('/?login=1'))
+
+class LogoutPage(webapp.RequestHandler):
+    def get(self): self.redirect(users.create_logout_url('/'))
 
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),
@@ -325,4 +314,6 @@ application = webapp.WSGIApplication([
         ('/feed250',                Feed250Page),
     ],
     debug=True)
-wsgiref.handlers.CGIHandler().run(application)
+
+if __name__ == '__main__':
+    wsgiref.handlers.CGIHandler().run(application)

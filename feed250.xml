@@ -10,13 +10,13 @@
 	<title>{{ movie.title }}</title>
 	<link>http://www.imdb.com{{ movie.url }}</link>
 	<guid>http://www.imdb.com{{ movie.url }}</guid>
-	<content:encoded><![CDATA[<table>
-<tr><td>Rank</td></td><td>{{ movie.rank }}</td></tr>
-<tr><td>Title</td></td><td>{{ movie.title }}</td></tr>
-<tr><td>Year</td></td><td>{{ movie.year }}</td></tr>
-<tr><td>Rating</td></td><td>{{ movie.rating }}</td></tr>
-<tr><td>Votes</td></td><td>{{ movie.votes }}</td></tr>
-</table>]]></content:encoded>
+	<description><![CDATA[
+<p>Rank: {{ movie.rank }}</p>
+<p>Title: {{ movie.title }}</p>
+<p>Year: {{ movie.year }}</p>
+<p>Rating: {{ movie.rating }}</p>
+<p>Votes: {{ movie.votes }}</p>
+]]></description>
 	<pubDate>{{ today|date:"r" }}</pubDate>
 </item>
 {% endfor %}

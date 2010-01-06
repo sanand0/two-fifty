@@ -80,8 +80,10 @@ class MoviePage(webapp.RequestHandler):
             person_info  = mark_rel([person_info], user_rel)[0]                 # Mark the rel tags
             person_recos = get_recos(movies)[0:10]
         else: person_info = None
+        just_logged_in  = False
         if self.request.get('login') and user_info:                             # If the user's just logged in, he'll be redirected to /?login=1
             user_info.login = now                                               # So set the last logged-in date for the user
+            just_logged_in  = True                                              # Google analytics variable
             user_info.put()
         can_change      = user==person and user
         top_watchers    = mark_rel(get_top_watchers(), user_rel)

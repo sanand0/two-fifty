@@ -1,12 +1,12 @@
-Hi {% firstof user_info.disp user_info.user.nickname %}
+Hi {% firstof person_info.disp person_info.user.nickname %}
 
 The Internet Movie Database Top 250 movie list has {{ new_movies|length }} new movies since you last visited {{ now|timesince:last_visited }} ago.
-Your list at http://250.s-anand.net{% if user_info.disp %}/name/{{ user_info.disp|urlencode }}{% else %}/user/{{ user_info.user.email }}{% endif %} says you've seen {{ user_info.num }} of these 250 movies. Here are a few new ones on the list:
+Your list at http://250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp|urlencode }}{% else %}/user/{{ person_info.user.email }}{% endif %} says you've seen {{ person_info.num }} of these 250 movies. Here are a few new ones on the list:
 
 {% for movie in new_movies %}{{ movie.rank }}. {{ movie.title }} ({{ movie.year }})
 {% endfor%}
 
-If you've seen any of these, why don't you let us and your friends know at http://250.s-anand.net{% if user_info.disp %}/name/{{ user_info.disp|urlencode }}{% else %}/user/{{ user_info.user.email }}{% endif %}   
+If you've seen any of these, why don't you let us and your friends know at http://250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp|urlencode }}{% else %}/user/{{ person_info.user.email }}{% endif %}   
 
 The IMDb Top 250 Tracker admin,
 Anand

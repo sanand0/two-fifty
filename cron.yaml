@@ -5,8 +5,8 @@ cron:
 
 - description: daily refresh of user activity
   url: /feed/refresh
-  schedule: every day 00:00
+  schedule: every day 00:15
 
 - description: daily campaign email
   url: /mail
-  schedule: every day 00:00
+  schedule: every day 00:30

@@ -31,6 +31,10 @@ handlers:
   static_files: favicons.png
   upload: favicons.png
 
+- url: /imdb-logo.gif
+  static_files: imdb-logo.gif
+  upload: imdb-logo.gif
+
 - url: /button-light-green.png
   static_files: button-light-green.png
   upload: button-light-green.png

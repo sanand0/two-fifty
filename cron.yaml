@@ -7,6 +7,6 @@ cron:
   url: /feed/refresh
   schedule: every day 00:15
 
-- description: daily campaign email
+- description: campaign email
   url: /mail
-  schedule: every day 00:30
+  schedule: every 6 hours

@@ -272,7 +272,7 @@ $('.movie a:not([href])')
 	});
 {% endif %}
 {% if not user and not person %}
-$('.movie a:not([href])').attr('href', '/login');
+$('.movie a:not([href])').attr('href', '/login').attr('title', 'Click to log in and mark this movie as seen');
 {% endif %}
 $('.movies tbody tr:odd').css('background-color', '#ebf8de');
 $('.movies a.im').attr('target', '_blank').attr('title', 'Open IMDb page in new window');

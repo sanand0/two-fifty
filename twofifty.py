@@ -5,10 +5,11 @@ from google.appengine.api                 import users, urlfetch, memcache
 from google.appengine.ext.webapp          import template
 from google.appengine.api.urlfetch_errors import *
 
-user        = users.get_current_user()
-now         = datetime.datetime.now()
-yesterday   = now - datetime.timedelta(1)
-page        = 'index.html'
+try:    user = users.get_current_user()
+except: user = None
+now          = datetime.datetime.now()
+yesterday    = now - datetime.timedelta(1)
+page         = 'index.html'
 
 def memcache_setdefault(key, value, time):
     memcache.set(key, value, time)
@@ -67,7 +68,7 @@ class MoviePage(webapp.RequestHandler):
 
     def show_page(self, person = None):
         movies          = read_250_from_db()                                    # Read from the datastore
-        compare_days    = 10                                                    # Number of days prior to compare with. TODO: Change this to days since last login
+        compare_days    = 5                                                     # Number of days prior to compare with. TODO: Change this to days since last login
         new_movies      = extract_new(movies, read_250_from_db(compare_days))   # Extract new movies since compare_days ago
         user_info       = Count.all().filter('user = ', user).get()             # User's count, name, etc.
         user_rel, user_followers = None, None
@@ -93,7 +94,7 @@ class MoviePage(webapp.RequestHandler):
 
 class NamePage(webapp.RequestHandler):
     def get(self, disp):
-        person_info = Count.all().filter('disp = ', urllib.unquote(disp)).get()
+        person_info = Count.all().filter('disp = ', urllib.unquote(disp)).get() # TODO: memcache
         if person_info:
             p = MoviePage()
             p.initialize(self.request, self.response)
@@ -174,12 +175,13 @@ def download_250():
         Top250(time=now, data='\n'.join(encode(movie) for movie in movies)).put()
 
 def read_250_from_db(n=0):
-    key = 'read_250_from_db' + str(n)
+    date = now - datetime.timedelta(n)
+    key = 'read_250_from_db' + date.strftime('%Y-%m-%d')
     data = memcache.get(key)
     if not data:
         def decode(str): return dict(pair.split(':',1) for pair in str.split('\t'))
         q = Top250.all().order('-time')                                                 # Want the most recent
-        top = n and q.filter('time < ', now - datetime.timedelta(n)).get() or q.get()   # before n 'days'
+        top = n and q.filter('time < ', date).get() or q.get()                          # before n 'days'
         data = top and list(decode(line) for line in top.data.split('\n')) or ()        # Decode it and send it back
     return memcache_setdefault(key, data, 12 * 3600)
 
@@ -211,7 +213,7 @@ def get_recos(movies, param='seen'):
 # TODO: This is a BAD function. Refactor.
 def user_prop(person, set_count = None, change_count = None, set_disp = None):
     # Get the person info, creating it only if the person is the user
-    person_info = Count.all().filter('user = ', person).get()
+    person_info = Count.all().filter('user = ', person).get()       # TODO: memcache
     if not person_info and user == person and (set_count or change_count or set_disp):
         person_info = Count(user=person, time=now, num=0)
 

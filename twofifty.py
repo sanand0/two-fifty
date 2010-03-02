@@ -25,13 +25,14 @@ class Seen(db.Model):
     url  = db.StringProperty     (required=True)                        # saw this movie
 
 class Count(db.Model):                                                  # (This is really the User master)
-    user  = db.UserProperty      (required=True)                        # Primary key: user
-    time  = db.DateTimeProperty  (required=True, auto_now_add=True)     # Last date a movie was marked by user
-    num   = db.IntegerProperty   (required=True)                        # Number of movies seen, when last counted
-    login = db.DateTimeProperty  ()                                     # Last logged in date
-    email = db.DateTimeProperty  ()                                     # Last emailed in date
-    disp  = db.StringProperty    ()                                     # Display name
-    rel   = db.TextProperty      ()                                     # TSV of relation => user
+    user    = db.UserProperty      (required=True)                      # Primary key: user
+    time    = db.DateTimeProperty  (required=True, auto_now_add=True)   # Last date a movie was marked by user
+    num     = db.IntegerProperty   (required=True)                      # Number of movies seen, when last counted
+    login   = db.DateTimeProperty  ()                                   # Last logged in date
+    email   = db.DateTimeProperty  ()                                   # Date the user was last sent an email
+    twitter = db.StringProperty    ()                                   # Twitter user ID
+    disp    = db.StringProperty    ()                                   # Display name
+    rel     = db.TextProperty      ()                                   # TSV of relation => user
 
 class Activity(db.Model):                                               # Daily feed of user activity.
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
@@ -236,22 +237,17 @@ def user_prop(person, set_count = None, change_count = None, set_disp = None):
 class DataPage(webapp.RequestHandler):
     def get(self, person, data):
         self.response.headers["Content-Type"] = "application/javascript"
-        callback = self.request.get('callback')
-        if data == 'users':
-            if user and users.is_current_user_admin():
-                userlist = Count.all().fetch(1000)
-                self.response.out.write(template.render('users.txt', locals()))
-        else:
-            person      = users.User(urllib.unquote(person))
-            person_info = Count.all().filter('user = ', person).get()
-            if person_info:
-                person_disp = person_info.disp or person.nickname()
-                if data == 'count':
-                    self.response.out.write(template.render('count.txt', locals()))
-                elif data == 'seen':
-                    movies = read_250_from_db()
-                    count  = mark_seen_movies(movies, person)
-                    self.response.out.write(template.render('seen.txt', locals()))
+        callback    = self.request.get('callback')
+        person      = users.User(urllib.unquote(person))
+        person_info = Count.all().filter('user = ', person).get()
+        if person_info:
+            person_disp = person_info.disp or person.nickname()
+            if data == 'count':
+                self.response.out.write(template.render('count.txt', locals()))
+            elif data == 'seen':
+                movies = read_250_from_db()
+                count  = mark_seen_movies(movies, person)
+                self.response.out.write(template.render('seen.txt', locals()))
 
 class FollowPage(webapp.RequestHandler):
     def get(self, request, other):

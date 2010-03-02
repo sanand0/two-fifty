@@ -63,6 +63,7 @@ input, textarea { background-color: #9bbb59; }
 .rss { background-position: -16px -16px;}
 
 .seen, .seen a { text-decoration: line-through; color: #c3d69b; }
+.last-seen { font-size: 10px; font-weight: normal; }
 .person { color:#4f6228; }
 .both { color: #ddd; font-style: normal; }
 .other { color: #da1f28; font-style: italic; }
@@ -143,6 +144,8 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 			</select>
 		{% endif %}
 		{% if person %}<span class="person">{% firstof person_info.disp person.nickname %}: <span class="user-seen-count">{{ person_info.num|default:"0" }}</span> / 250</span>
+			{% if person_info.login %}<span class="last-seen">login {{  person_info.login|timesince }} ago</span>{% else %}
+			{% if person_info.time  %}<span class="last-seen">seen {{ person_info.time|timesince }} ago</span>{% endif %}{% endif %}
 			{% if other %}vs <span class="other">{% firstof other_info.disp other_info.user.nickname %}: {{ other_info.num|default:"0" }} / 250</span>
 			{% else %}
 				{% if user %}{% ifnotequal user person %}
@@ -223,7 +226,7 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 				<a href="/compare/{% firstof x.disp x.user.email %}" class="diff">diff</a>
 				{% if not x.follower %}<a class="follow" href="/follow/{{ x.user.email }}">follow</a>{% endif %}
 			{% endifnotequal %}{% endif %}
-			<span class="stats">{{ now|timesince:x.time }} ago </span>
+			<span class="stats">{{ x.time|timesince }} ago </span>
 		{% endfor %}
 		</table>
 	</div>
@@ -234,8 +237,7 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 		<div class="grid_6">
 			<h2>API</h2>
 			<p><a href="/data/root.node@gmail.com/count"><code>/data/<i>user</i>/count</code></a> returns the user's watched count
-			<br><a href="/data/root.node@gmail.com/seen"><code>/data/<i>user</i>/seen</code></a> returns the user's seen / unseen movies
-			<br><code>/data/all/users</code> is an <i>Admin</i> API that shows all users</p>
+			<br><a href="/data/root.node@gmail.com/seen"><code>/data/<i>user</i>/seen</code></a> returns the user's seen / unseen movies</p>
 			<p>Results in returned in JSON, with <code>callback</code> support.
 			<br>e.g. <a href="/data/root.node@gmail.com/count?callback=fn"><code>/data/<i>user</i>/count?callback=fn</code></a>.</p>
 			<p><a type="application/rss+xml" rel="alternate" class="ic rss" href="http://feeds.s-anand.net/imdbtop250"></a> <a href="http://feeds.s-anand.net/imdbtop250">Subscribe to the IMDb Top 250</a></p>

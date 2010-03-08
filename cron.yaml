@@ -14,3 +14,7 @@ cron:
 - description: campaign email
   url: /mail
   schedule: every 6 hours
+
+- description: Daily exception report
+  url: /_ereporter?sender=root.node@gmail.com
+  schedule: every day 00:00

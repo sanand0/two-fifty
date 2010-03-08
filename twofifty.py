@@ -1,6 +1,6 @@
 import wsgiref.handlers, urllib, re, datetime, logging, recodata, operator
 from BeautifulSoup                        import BeautifulSoup
-from google.appengine.ext                 import webapp, db
+from google.appengine.ext                 import webapp, db, ereporter
 from google.appengine.api                 import users, urlfetch, memcache
 from google.appengine.ext.webapp          import template
 from google.appengine.api.urlfetch_errors import *
@@ -10,6 +10,9 @@ except: user = None
 now          = datetime.datetime.now()
 yesterday    = now - datetime.timedelta(1)
 page         = 'index.html'
+
+# http://blog.notdot.net/2010/03/Using-the-ereporter-module-for-easy-error-reporting-in-App-Engine
+ereporter.register_logger()
 
 def memcache_setdefault(key, value, time):
     memcache.set(key, value, time)

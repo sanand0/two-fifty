@@ -316,7 +316,7 @@ application = webapp.WSGIApplication([
         ('/feed',                   FeedPage),
         ('/feed250',                Feed250Page),
     ],
-    debug=True)
+    debug=False)
 
 if __name__ == '__main__':
     wsgiref.handlers.CGIHandler().run(application)

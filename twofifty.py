@@ -154,9 +154,10 @@ def mark_rel(users, rel):
     if not rel: return users
     for user in users:
         for tag in rel:
-            other = user.user.email()
-            if other in rel[tag]:
-                user.__setattr__(tag, rel[tag][other])
+            if user:
+                other = user.user.email()
+                if other in rel[tag]:
+                    user.__setattr__(tag, rel[tag][other])
     return users
 
 def download_250():

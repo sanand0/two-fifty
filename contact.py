@@ -28,8 +28,8 @@ class GenerateContactsPage(webapp.RequestHandler):
             contacts.users = pickle.dumps(users)
             contacts.put()
             if len(new) >= CHUNK:
-                taskqueue.add(url='/contact/generate')
-        
+                taskqueue.add(url='/contact/generate', method='GET')
+
         # users = memcache.get('all_users') or []
         # logging.info('%d users in cache. ' % len(users))
         # if not users:   new = Count.all().order('__key__').fetch(1000)

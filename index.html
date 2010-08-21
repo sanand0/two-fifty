@@ -48,6 +48,7 @@ input, textarea { background-color: #9bbb59; }
 	background-image: -moz-linear-gradient    (left top, left bottom, from(#bbe06a), to(#9bbb59));
 	background-image: -webkit-gradient(linear, left top, left bottom, from(#bbe06a), to(#9bbb59));
 }
+.movies tbody tr:nth-child(odd) { background-color: #ebf8de; }
 
 .instructions { color: #4f6228; font-style: italic; }
 #filter { float:right; border: 1px solid #4f6228; border-width: 1px 0 0 1px; }
@@ -277,7 +278,7 @@ $('.movie a:not([href])')
 {% if not user and not person %}
 $('.movie a:not([href])').attr('href', '/login').attr('title', 'Click to log in and mark this movie as seen');
 {% endif %}
-$('.movies tbody tr:odd').css('background-color', '#ebf8de');
+if ($.browser.msie) { $('.movies tbody tr:odd').css('background-color', '#ebf8de'); }
 $('.movies a.im').attr('target', '_blank').attr('title', 'Open IMDb page in new window');
 $('a.diff').attr('title', 'Compare with yourself');
 $('.source').click(function() { $(this).select(); });

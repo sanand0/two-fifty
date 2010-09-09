@@ -1,7 +1,17 @@
 <!doctype html>
 <html><head>
 <!-- Google Website Optimizer Control Script -->
-<script>function utmx_section(){}function utmx(){}(function(){var k='4014493227',d=document,l=d.location,c=d.cookie;function f(n){if(c){var i=c.indexOf(n+'=');if(i>-1){var j=c.indexOf(';',i);return c.substring(i+n.length+1,j<0?c.length:j)}}}var x=f('__utmx'),xx=f('__utmxx'),h=l.hash;d.write('<sc'+'ript src="'+'http'+(l.protocol=='https:'?'s://ssl':'://www')+'.google-analytics.com'+'/siteopt.js?v=1&utmxkey='+k+'&utmx='+(x?x:'')+'&utmxx='+(xx?xx:'')+'&utmxtime='+new Date().valueOf()+(h?'&utmxhash='+escape(h.substr(1)):'')+'" type="text/javascript" charset="utf-8"></sc'+'ript>')})();</script>
+<script>
+function utmx_section(){}function utmx(){}
+(function(){var k='0925130080',d=document,l=d.location,c=d.cookie;function f(n){
+if(c){var i=c.indexOf(n+'=');if(i>-1){var j=c.indexOf(';',i);return c.substring(i+n.
+length+1,j<0?c.length:j)}}}var x=f('__utmx'),xx=f('__utmxx'),h=l.hash;
+d.write('<sc'+'ript src="'+
+'http'+(l.protocol=='https:'?'s://ssl':'://www')+'.google-analytics.com'
++'/siteopt.js?v=1&utmxkey='+k+'&utmx='+(x?x:'')+'&utmxx='+(xx?xx:'')+'&utmxtime='
++new Date().valueOf()+(h?'&utmxhash='+escape(h.substr(1)):'')+
+'" type="text/javascript" charset="utf-8"></sc'+'ript>')})();
+</script>
 <!-- End of Google Website Optimizer Control Script -->
 
 <title>{% if person %}{% firstof person_info.disp person.nickname %}: {{ person_info.num }} movies on the IMDb Top 250{% else %}Track IMDb Top 250 movies{% endif %}</title>
@@ -175,12 +185,22 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 	</div>
 	<div class="grid_4">
 		{% if person_info %}
+
+		{% if not person_info.donated %}
+		<h2>Contribute</h2>
+		<script>utmx_section("Contribution")</script>
+		<p>Please contribute 1 dollar towards hosting.</p>
+		<p><a class="button share_money" href="/contribute/1"><span>Contribute $1</span></a>
+		</noscript>
+		<p>I use Google AppEngine and have run out of free quotas.</p>
+		{% else %}
+		<p>Thanks for contributing.<br>If the payment failed, <a href="/contribute/1">retry contributing</a>.</p>
+		{% endif %}
+
 		<h2>Share this page</h2>
 		<p>
-			<script>utmx_section("SharingLinks")</script>
-			<a class="share_twitter" target="_blank" href="http://twitter.com/home"><b class="ic twitter"></b> Share on Twitter</a>
-			<br><a class="share_facebook" target="_blank" href="http://www.facebook.com/sharer.php"><b class="ic facebook"></b> Share on Facebook</a>
-			</noscript>
+			<a class="button share_twitter" target="_blank" href="http://twitter.com/home"><span>Share on Twitter</span></a>
+			<br><a class="button share_facebook" target="_blank" href="http://www.facebook.com/sharer.php"><span> Share on Facebook</span></a>
 		</p>
 		<p>Link: <a class="share_link" target="_blank" href="http://250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp|urlencode }}{% else %}/user/{{ person_info.user.email }}{% endif %}">250.s-anand.net{% if person_info.disp %}/name/{{ person_info.disp }}{% else %}/user/{{ person_info.user.email }}{% endif %}</a>		{% endif %}</p>
 		{% if person_recos %}
@@ -389,8 +409,15 @@ resolve.forEach(object,block,context);}};
 </script>
 
 <!-- Google Website Optimizer Tracking Script -->
-<script type="text/javascript">if(typeof(_gat)!='object')document.write('<sc'+'ript src="http'+(document.location.protocol=='https:'?'s://ssl':'://www')+'.google-analytics.com/ga.js"></sc'+'ript>')</script>
-<script type="text/javascript">try {var gwoTracker=_gat._getTracker("UA-7021987-1");gwoTracker._trackPageview("/4014493227/test");}catch(err){}</script>
+<script type="text/javascript">
+if(typeof(_gat)!='object')document.write('<sc'+'ript src="http'+
+(document.location.protocol=='https:'?'s://ssl':'://www')+
+'.google-analytics.com/ga.js"></sc'+'ript>')</script>
+<script type="text/javascript">
+try {
+var gwoTracker=_gat._getTracker("UA-7021987-1");
+gwoTracker._trackPageview("/0925130080/test");
+}catch(err){}</script>
 <!-- End of Google Website Optimizer Tracking Script -->
 
 <script>
@@ -407,8 +434,8 @@ $('a[class^=share],a.ic').click(function()	{ pageTracker._trackPageview('/clicke
 
 <!-- Google Website Optimizer Conversion Script -->
 <script type="text/javascript">
-$('.share_twitter,.share_facebook,.share_link').click(function() {
-	try {var gwoTracker=_gat._getTracker("UA-7021987-1");gwoTracker._trackPageview("/4014493227/goal");}catch(err){}
+$('.share_money').click(function() {
+	try {var gwoTracker=_gat._getTracker("UA-7021987-1");gwoTracker._trackPageview("/0925130080/goal");}catch(err){}
 });
 </script>
 <!-- End of Google Website Optimizer Conversion Script -->

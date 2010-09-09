@@ -36,6 +36,7 @@ class Count(db.Model):                                                  # (This 
     twitter = db.StringProperty    ()                                   # Twitter user ID
     disp    = db.StringProperty    ()                                   # Display name
     rel     = db.TextProperty      ()                                   # TSV of relation => user
+    donated = db.IntegerProperty   ()                                   # contributed this many dollars
 
 class Activity(db.Model):                                               # Daily feed of user activity.
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # Last modified date
@@ -303,6 +304,34 @@ class LoginPage(webapp.RequestHandler):
 class LogoutPage(webapp.RequestHandler):
     def get(self): self.redirect(users.create_logout_url('/'))
 
+class ContributePage(webapp.RequestHandler):
+    '''
+    Contribution is an experiment. Not a way of making money.
+    To avoid distraction, I will turn it off once I have 30 payments
+    (30 datapoints required for reasonable statistical significance)
+    Check whether $1 or $2 makes a difference.
+    Check whether PayPal symbol makes a difference.
+
+    Launched: 9-Sep-2010
+    Estimate: 30 people/day, 1/500 pay, 4 pay in month 1, 10 pay in month 4.
+    '''
+    def get(self, amount):
+        if user:
+            # Log info about user's contribution
+            amount = int(amount)
+            user_info  = Count.all().filter('user = ', user).get()
+            if not user_info.donated: user_info.donated = amount
+            else: user_info.donated += amount
+            user_info.put()
+
+            # Redirect to PayPal
+            if amount == 1:
+                self.redirect('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=L2UFCKYTW9A8E')
+            else:
+                self.redirect('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2KXDDHHKU8NBL')
+        else:
+            self.redirect(users.create_login_url('/?login=1'))
+
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),
         ('/user/(.+)',              MoviePage),
@@ -316,6 +345,7 @@ application = webapp.WSGIApplication([
         ('/feed/refresh',           FeedRefreshPage),
         ('/feed',                   FeedPage),
         ('/feed250',                Feed250Page),
+        ('/contribute/(\d+)',       ContributePage),
     ],
     debug=False)
 

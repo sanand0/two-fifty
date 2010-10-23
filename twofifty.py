@@ -314,6 +314,9 @@ class ContributePage(webapp.RequestHandler):
 
     Launched: 9-Sep-2010
     Estimate: 30 people/day, 1/500 pay, 4 pay in month 1, 10 pay in month 4.
+    Shutdown: 6-Oct-2010. 12 people donated $14
+    Turned off because I made some stupid mistake with Google Website Optimizer
+    and it wasn't tracking anything anyway.
     '''
     def get(self, amount):
         if user:

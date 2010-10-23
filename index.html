@@ -1,19 +1,5 @@
 <!doctype html>
 <html><head>
-<!-- Google Website Optimizer Control Script -->
-<script>
-function utmx_section(){}function utmx(){}
-(function(){var k='0925130080',d=document,l=d.location,c=d.cookie;function f(n){
-if(c){var i=c.indexOf(n+'=');if(i>-1){var j=c.indexOf(';',i);return c.substring(i+n.
-length+1,j<0?c.length:j)}}}var x=f('__utmx'),xx=f('__utmxx'),h=l.hash;
-d.write('<sc'+'ript src="'+
-'http'+(l.protocol=='https:'?'s://ssl':'://www')+'.google-analytics.com'
-+'/siteopt.js?v=1&utmxkey='+k+'&utmx='+(x?x:'')+'&utmxx='+(xx?xx:'')+'&utmxtime='
-+new Date().valueOf()+(h?'&utmxhash='+escape(h.substr(1)):'')+
-'" type="text/javascript" charset="utf-8"></sc'+'ript>')})();
-</script>
-<!-- End of Google Website Optimizer Control Script -->
-
 <title>{% if person %}{% firstof person_info.disp person.nickname %}: {{ person_info.num }} movies on the IMDb Top 250{% else %}Track IMDb Top 250 movies{% endif %}</title>
 <meta name="title" content="{% if person %}{% firstof person_info.disp person.nickname %} has seen {{ person_info.num }} of the IMDb Top 250 movies{% else %}Track IMDb Top 250 movies{% endif %}" />
 <meta name="description" content="Track movies you've seen on the Internet Movie Database (IMDb) Top 250 list. Get recommendations. Compare your movie watching with others.">
@@ -186,16 +172,7 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 	<div class="grid_4">
 		{% if person_info %}
 
-		{% if not person_info.donated %}
-		<h2>Contribute</h2>
-		<script>utmx_section("Contribution")</script>
-		<p>Please contribute 1 dollar towards hosting.</p>
-		<p><a class="button share_money" href="/contribute/1"><span>Contribute $1</span></a>
-		</noscript>
-		<p>I use Google AppEngine and have run out of free quotas.</p>
-		{% else %}
-		<p>Thanks for contributing.<br>If the payment failed, <a href="/contribute/1">retry contributing</a>.</p>
-		{% endif %}
+		{% if person_info.donated %}<!-- Thank you for donating! Didn't want to clutter your screen with a thank you, but if you did view the source, wanted to let you know :-) -->{% endif %}
 
 		<h2>Share this page</h2>
 		<p>
@@ -408,18 +385,6 @@ Function.prototype.forEach=function(object,block,context){for(var key in object)
 resolve.forEach(object,block,context);}};
 </script>
 
-<!-- Google Website Optimizer Tracking Script -->
-<script type="text/javascript">
-if(typeof(_gat)!='object')document.write('<sc'+'ript src="http'+
-(document.location.protocol=='https:'?'s://ssl':'://www')+
-'.google-analytics.com/ga.js"></sc'+'ript>')</script>
-<script type="text/javascript">
-try {
-var gwoTracker=_gat._getTracker("UA-7021987-1");
-gwoTracker._trackPageview("/0925130080/test");
-}catch(err){}</script>
-<!-- End of Google Website Optimizer Tracking Script -->
-
 <script>
 var pageTracker = _gat._getTracker("UA-7269195-1");
 pageTracker._trackPageview();
@@ -431,14 +396,6 @@ $('a.unfollow'			).click(function()	{ pageTracker._trackPageview('/clicked/unfol
 $('#filter' 			).change(function()	{ pageTracker._trackPageview('/clicked/filter');				});
 $('a[class^=share],a.ic').click(function()	{ pageTracker._trackPageview('/clicked/'+$(this).attr('class'));});
 </script>
-
-<!-- Google Website Optimizer Conversion Script -->
-<script type="text/javascript">
-$('.share_money').click(function() {
-	try {var gwoTracker=_gat._getTracker("UA-7021987-1");gwoTracker._trackPageview("/0925130080/goal");}catch(err){}
-});
-</script>
-<!-- End of Google Website Optimizer Conversion Script -->
 
 <!-- script type="text/javascript">try { setTimeout(function() { $.getScript('/build-reco.js'); }, 5000); } catch(err) {}</script -->
 <!-- script src="http://asset.userfly.com/users/12427/userfly.js" type="text/javascript"></script -->

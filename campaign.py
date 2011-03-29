@@ -31,7 +31,10 @@ class MailPage(webapp.RequestHandler):
                 person_info = user_prop(person_info.user, set_count = user_count)   # and save it in the datastore
                 if person_info:
                     vars = dict(locals().items() + globals().items())
-                    mail.send_mail('250@s-anand.net', person_info.user.email(), 'New movies on the IMDb Top 250', template.render('campaign.txt', vars), html=template.render('campaign.html', vars))
+                    mail.send_mail('250@s-anand.net', person_info.user.email(),
+                        'New movies on the IMDb Top 250',
+                        template.render('campaign.txt', vars),
+                        html=template.render('campaign.html', vars))
                     logging.info('Sent campaign email to ' + person_info.user.email())
                     self.response.out.write(person_info.user.email() + '\n')
                     person_info.email = now

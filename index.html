@@ -78,6 +78,7 @@ a.button,span.button,del.button{display:-moz-inline-box;display:inline-block;cur
 a.button span,span.button button,span.button input,del.button span{white-space:nowrap;cursor:pointer;color:#fff;display:-moz-inline-box;display:inline-block;line-height:1;letter-spacing:0!important;font:bold 14px sans-serif;background-color:transparent;background-position:100% 0;background-repeat:no-repeat;height:30px;padding:8px 20px 0 10px;margin:0 -20px 0 10px;border:none;vertical-align:text-top;zoom:1;_position:relative;_padding-left:0;_padding-right:12px;_margin-right:-16px;_display:block;_top:0;_right:-5px;}span.button button{line-height:2.5;}html.safari a.button span,html.safari del.button span{line-height:1.3;}html.safari span.button button{line-height:2.6;}html.safari a.button:focus,html.safari span.button button:focus{outline:none;}del.button{background-position:0 -120px;}del.button span{cursor:default;color:#aaa!important;background-position:100% -120px;}span.button button,span.button input{padding-top:0;line-height:2.5;}a.button:hover,span.button:hover,a.button:focus,a.dom-button-focus,span.button-behavior-hover{background-position:0 -60px;color:#222;text-decoration:none;}a.button:hover span,span.button:hover button,a.button:focus span,span.button-behavior-hover button,span.button-behavior-hover input{background-position:100% -60px;}a.button:active,a.button:focus span{color:#444;}del.button-behavior-hover,del.button:hover{background-position:0 -180px;}del.button-behavior-hover span,del.button:hover span{background-position:100% -180px;}span.button button,del.button span,span.button input{_behavior:expression((function(e){if(typeof(behavior_onMouseEnter)=='undefined'){behavior_onMouseEnter=function(e){var d=this.parentNode;var c=d.className;d.__defaultClassName=c;d.className=c+' button-behavior-hover';this.setCapture();};behavior_onMouseLeave=function(e){var d=this.parentNode;d.className=d.__defaultClassName;d.__defaultClassName=undefined;this.releaseCapture();};};e.runtimeStyle.behavior='none';e.onmouseenter=behavior_onMouseEnter;e.onmouseleave=behavior_onMouseLeave;})(this));}
 </style>
 </head><body>
+{% autoescape off %}
 <div class="blackbar">
 	<div class="container_12">
 		<div id="header-bar" class="grid_12">
@@ -260,7 +261,7 @@ a.button span,span.button button,span.button input,del.button span{white-space:n
 	</div>
 </div>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 <script>
 try { document.execCommand("BackgroundImageCache", false, fix); } catch(err) { }
 
@@ -405,3 +406,4 @@ $('a[class^=share],a.ic').click(function()	{ pageTracker._trackPageview('/clicke
 <script src='http://s3.amazonaws.com/getsatisfaction.com/feedback/feedback.js' type='text/javascript'></script>
 <script>GSFN.feedback('http://getsatisfaction.com/twofifty/feedback/topics/new?display=overlay&style=idea', {'placement': 'left', 'color': '#222'});</script>
 </body></html>
+{% endautoescape %}

@@ -1,3 +1,6 @@
+from google.appengine.dist import use_library
+use_library('django', '1.2')
+
 import wsgiref.handlers, urllib, re, datetime, logging, recodata, operator
 from BeautifulSoup                        import BeautifulSoup
 from google.appengine.ext                 import webapp, db, ereporter
@@ -335,10 +338,22 @@ class ContributePage(webapp.RequestHandler):
         else:
             self.redirect(users.create_login_url('/?login=1'))
 
+class VisualPage(webapp.RequestHandler):
+    '''
+    An experiment in visualising the top movies
+    '''
+    def get(self, person=user):
+        if not person: person = user
+        else: person = users.User(urllib.unquote(person))
+        if not person:
+            self.redirect(users.create_login_url('/?login=1'))
+        self.response.out.write(template.render('visual.html', locals()))
+
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),
         ('/user/(.+)',              MoviePage),
         ('/name/(.+)',              NamePage),
+        ('/visual/?(.+)?',          VisualPage),
         ('/data/(.+)/(.+)',         DataPage),
         ('/compare/([^/]+)/?(.+)?', ComparePage),
         ('/login',                  LoginPage),

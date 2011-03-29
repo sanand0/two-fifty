@@ -67,6 +67,11 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
+- url: /imdb-10000.csv
+  static_files: imdb-10000.csv
+  upload: imdb-10000.csv
+  mime_type: text/csv
+
 - url: /google4a8c0507e54bfbd4.html
   static_files: google4a8c0507e54bfbd4.html
   upload: google4a8c0507e54bfbd4.html
@@ -92,6 +97,7 @@ handlers:
 
 - url: /contact/.*
   script: contact.py
+  login: admin
 
 - url: /.*
   script: twofifty.py

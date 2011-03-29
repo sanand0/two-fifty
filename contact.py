@@ -24,7 +24,7 @@ class GenerateContactsPage(webapp.RequestHandler):
         else:         new = Count.all().filter('__key__ > ', users[-1].key()).order('__key__').fetch(CHUNK)
         if new:
             users += new
-            if not contacts: contacts = Contact()
+            contacts = Contacts()
             contacts.users = pickle.dumps(users)
             contacts.put()
             if len(new) >= CHUNK:
@@ -63,16 +63,13 @@ class AllContactsPage(webapp.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/plain'
         userlist = memcache.get('all_users') or []
-        if user and users.is_current_user_admin():
-            if userlist: self.response.out.write(template.render('users.txt', locals()))
-            else:        self.response.out.write('No user list')
-        else:
-            self.response.out.write('Log in as admin')
+        if userlist: self.response.out.write(template.render('users.txt', locals()))
+        else:        self.response.out.write('No user list')
 
 application = webapp.WSGIApplication([
         ('/contact/auth',     AuthContactsPage),
         ('/contact/get',      GetContactsPage),
-        ('/contact/all',      AllContactsPage),         # Shows all the contacts to the admin
+        ('/contact/all',      AllContactsPage),         # Shows all the contacts
         ('/contact/generate', GenerateContactsPage),    # Generates a list of contacts and stores it on the database
     ],
     debug=True)

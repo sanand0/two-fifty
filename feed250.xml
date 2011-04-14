@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+{% autoescape off %}<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
 <channel>
 <title>IMDb Top 250</title>
@@ -21,4 +21,4 @@
 </item>
 {% endfor %}
 </channel>
-</rss>
+</rss>{% endautoescape %}

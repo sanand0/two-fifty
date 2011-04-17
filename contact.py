@@ -1,3 +1,6 @@
+from google.appengine.dist import use_library
+use_library('django', '1.2')
+
 from google.appengine.ext           import webapp, db
 from google.appengine.api           import users, memcache
 from google.appengine.api.labs      import taskqueue

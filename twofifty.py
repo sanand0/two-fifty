@@ -30,6 +30,12 @@ class Seen(db.Model):
     time = db.DateTimeProperty   (required=True, auto_now_add=True)     # at this time,
     url  = db.StringProperty     (required=True)                        # saw this movie
 
+class SeenTitle(db.Model):
+    user  = db.UserProperty       (required=True)                       # This user,
+    time  = db.DateTimeProperty   (required=True, auto_now_add=True)    # at this time,
+    title = db.StringProperty     (required=True)                       # saw this movie
+    year  = db.StringProperty     (required=True)                       # dated...
+
 class Count(db.Model):                                                  # (This is really the User master)
     user    = db.UserProperty      (required=True)                      # Primary key: user
     time    = db.DateTimeProperty  (required=True, auto_now_add=True)   # Last date a movie was marked by user
@@ -54,6 +60,7 @@ class MoviePage(webapp.RequestHandler):
 
     def post(self):
         movie, disp = (self.request.get(x) for x in ('movie', 'disp'))
+        title, year = (self.request.get(x) for x in ('title', 'year'))
         if not user:                                                            # Must be logged in to make any changes
             self.response.out.write('Not logged in')
             return
@@ -67,6 +74,16 @@ class MoviePage(webapp.RequestHandler):
                 Seen(user=user, time=now, url=movie).put()
                 user_prop(user, change_count=+1)
             self.response.out.write(movie)
+
+        elif title and year:                                                    # Toggle a seen movie by title and year
+            seen = SeenTitle.all().filter('user = ', user)
+            seen = seen.filter('title = ', title)
+            seen = seen.filter('year = ', year).get()
+            if seen:
+                seen.delete()
+            else:
+                SeenTitle(user=user, time=now, title=title, year=year).put()
+            self.response.out.write(title)
 
         elif disp:                                                              # Change the display name. TODO: disp cannot contain @, /, ...
             if all(ord(c) < 128 for c in disp):                                 # Ensure that disp is pure ascii. Django templates croak otherwise
@@ -242,6 +259,9 @@ def user_prop(person, set_count = None, change_count = None, set_disp = None):
 
     return person_info
 
+
+def _html_convert(c): return
+
 class DataPage(webapp.RequestHandler):
     def get(self, person, data):
         self.response.headers["Content-Type"] = "application/javascript"
@@ -255,6 +275,11 @@ class DataPage(webapp.RequestHandler):
             elif data == 'seen':
                 movies = read_250_from_db()
                 count  = mark_seen_movies(movies, person)
+                self.response.out.write(template.render('seen.txt', locals()))
+            elif data == 'seentitle':
+                movies = read_250_from_db()
+                count  = mark_seen_movies(movies, person)
+                titles = SeenTitle.all().filter('user = ', person).fetch(1000)
                 self.response.out.write(template.render('seen.txt', locals()))
 
 class FollowPage(webapp.RequestHandler):
@@ -346,8 +371,10 @@ class VisualPage(webapp.RequestHandler):
         if not person: person = user
         else: person = users.User(urllib.unquote(person))
         if not person:
-            self.redirect(users.create_login_url('/?login=1'))
-        self.response.out.write(template.render('visual.html', locals()))
+            return self.redirect(users.create_login_url('/visual'))
+        else:
+            other_page = person != user
+            self.response.out.write(template.render('visual.html', locals()))
 
 application = webapp.WSGIApplication([
         ('/',                       MoviePage),

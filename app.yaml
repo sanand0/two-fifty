@@ -30,34 +30,42 @@ handlers:
 - url: /favicons.png
   static_files: favicons.png
   upload: favicons.png
+  expiration: "1d"
 
 - url: /imdb-logo.gif
   static_files: imdb-logo.gif
   upload: imdb-logo.gif
+  expiration: "1d"
 
 - url: /button-light-green.png
   static_files: button-light-green.png
   upload: button-light-green.png
+  expiration: "1d"
 
 - url: /button-light-green.gif
   static_files: button-light-green.gif
   upload: button-light-green.gif
+  expiration: "1d"
 
 - url: /movie-count-widget.png
   static_files: movie-count-widget.png
   upload: movie-count-widget.png
+  expiration: "1d"
 
 - url: /movie-seen-widget.png
   static_files: movie-seen-widget.png
   upload: movie-seen-widget.png
+  expiration: "1d"
 
 - url: /track-top-250.png
   static_files: track-top-250.png
   upload: track-top-250.png
+  expiration: "1d"
 
 - url: /login-button.png
   static_files: login-button.png
   upload: login-button.png
+  expiration: "1d"
 
 - url: /xd-receiver.htm
   static_files: xd-receiver.htm

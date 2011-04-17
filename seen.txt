@@ -1,3 +1,5 @@
 {% autoescape off %}{% if callback %}{{ callback }}({% endif %}{"user":"{{ person.email }}","name":"{{ person_disp|addslashes }}","count":{{ person_info.num }},"movies":[
 {% for movie in movies %}{"rank":"{{movie.rank}}","title":"{{movie.title|addslashes}}","year":"{{movie.year}}","url":"{{movie.url}}","rating":"{{movie.rating}}","votes":"{{movie.votes}}"{% if movie.seen %},"seen":"{{movie.seen}}"{% endif %}}{% if not forloop.last %},{% endif %}
-{% endfor %}]}{% if callback %}){% endif %}{% endautoescape %}
+{% endfor %}
+{% if titles %}{% if movies %},{% endif %}{% for movie in titles %}{"title":"{{ movie.title|escapejs }}","year":"{{movie.year}}","seen":"{{movie.time}}"}{% if not forloop.last %},{% endif %}
+{% endfor %}{% endif %}]}{% if callback %}){% endif %}{% endautoescape %}

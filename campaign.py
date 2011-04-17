@@ -2,6 +2,9 @@
 Emails people who're not active: (not logged in for 2 months) or (haven't marked a movie for 6 months && have unseen movies)
 '''
 
+from google.appengine.dist import use_library
+use_library('django', '1.2')
+
 import wsgiref.handlers, urllib, logging
 from datetime                       import timedelta
 from twofifty                       import now, Count, extract_new, read_250_from_db, mark_seen_movies, user_prop

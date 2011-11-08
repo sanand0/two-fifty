@@ -103,9 +103,5 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/ereporter/report_generator.py
   login: admin
 
-- url: /contact/.*
-  script: contact.py
-  login: admin
-
 - url: /.*
   script: twofifty.py
